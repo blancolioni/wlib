@@ -110,15 +110,20 @@ package body WL.Processes is
                   Process.Tick := Process.Finish;
                end if;
                declare
+                  Last_Value : constant Natural :=
+                                 Natural (Float (Process.Tick - 1)
+                                          / Float (Process.Finish) * 100.0);
                   Value : constant Natural :=
-                            Natural (Float (Process.Tick)
-                                     / Float (Process.Finish) * 100.0);
+                                 Natural (Float (Process.Tick)
+                                          / Float (Process.Finish) * 100.0);
                begin
-                  Put (Ada.Text_IO.Standard_Error,
-                       Character'Val (13) &
-                         Process.Name.all & ":"
-                       & Natural'Image (Value) & "%");
-                  Flush (Ada.Text_IO.Standard_Error);
+                  if Last_Value /= Value then
+                     Put (Ada.Text_IO.Standard_Error,
+                          Character'Val (13) &
+                            Process.Name.all & ":"
+                          & Natural'Image (Value) & "%");
+                     Flush (Ada.Text_IO.Standard_Error);
+                  end if;
                end;
          end case;
       end if;
