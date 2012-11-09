@@ -182,7 +182,7 @@ package body WL.Bitmap_IO is
         (Width        => Width,
          Height       => Height,
          Depth        => 32,
-         Data         => new Bitmap_Data (0 .. Width - 1, 0 .. Width - 1),
+         Data         => new Bitmap_Data (0 .. Width - 1, 0 .. Height - 1),
          Indices      => null,
          Colourmap    => null);
    begin
