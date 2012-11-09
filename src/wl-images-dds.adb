@@ -117,11 +117,12 @@ package body WL.Images.DDS is
          H := Header.Height;
 
          Image.Num_Levels :=
-           Image_Level_Count (Header.Mip_Map_Count);
+           Image_Level_Count
+             (Word_32'Max (Header.Mip_Map_Count, 1));
 
          Ada.Text_IO.Put_Line ("Mipmap levels:" & Header.Mip_Map_Count'Img);
 
-         for I in 0 .. Header.Mip_Map_Count - 1 loop
+         for I in 1 .. Image.Num_Levels loop
             if Format_RGBA_8 then
                Num_Bytes := W * H * RGB_Bits / 8;
             else
@@ -144,14 +145,14 @@ package body WL.Images.DDS is
                         declare
                            R, G, B, A : Word_8;
                         begin
+                           Read (File, B);
+                           Read (File, G);
+                           Read (File, R);
                            if RGB_Bits = 32 then
                               Read (File, A);
                            else
                               A := 255;
                            end if;
-                           Read (File, B);
-                           Read (File, G);
-                           Read (File, R);
                            Image.Levels (Level).Data
                              (Natural (X), Natural (Y)) :=
                              (Red    => Colour_Element (R),
