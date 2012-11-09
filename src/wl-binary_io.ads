@@ -17,9 +17,22 @@ package WL.Binary_IO is
 
    procedure Close (File : in out File_Type);
 
-   type Word_32 is mod 2 ** 32;
-   type Word_16 is mod 2 ** 16;
-   type Word_8 is mod 2 ** 8;
+   type Word_32 is mod 2**32;
+   type Word_16 is mod 2**16;
+   type Word_8 is mod 2**8;
+
+   procedure Read (File   : in out File_Type;
+                   Item   :    out Word_32);
+
+   procedure Read (File   : in out File_Type;
+                   Item   :    out Word_16);
+
+   procedure Read (File   : in out File_Type;
+                   Item   :    out Word_8);
+
+   procedure Read (File        : in out File_Type;
+                   Size        : in     Word_32;
+                   Destination : in     System.Address);
 
    procedure Read (File   : in     File_Type;
                    Item   :    out Word_32;
@@ -47,7 +60,7 @@ package WL.Binary_IO is
                    Length      : in     Word_32;
                    Destination : in     System.Address);
 
-   procedure Write (File    : in out File_Type;
+   procedure Write (File   : in out File_Type;
                     Length  : in     Word_32;
                     Source  : in     System.Address);
 
@@ -62,10 +75,11 @@ private
 
    type File_Type is
       record
-         Path : access String;
-         Data : Storage_Array_Access;
-         Mode : File_Mode;
-         Size : System.Storage_Elements.Storage_Count;
+         Path   : access String;
+         Data   : Storage_Array_Access;
+         Mode   : File_Mode;
+         Size   : System.Storage_Elements.Storage_Count;
+         Offset : Word_32 := 0;
       end record;
 
 end WL.Binary_IO;

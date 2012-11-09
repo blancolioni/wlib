@@ -1,6 +1,6 @@
 with Ada.Text_IO;
 
-with Binary_IO;                        use Binary_IO;
+with WL.Binary_IO;                     use WL.Binary_IO;
 
 package body WL.Images.DDS is
 
