@@ -73,7 +73,7 @@ package body WL.Binary_IO is
    begin
       File := (new String'(Name),
                new System.Storage_Elements.Storage_Array (0 .. 65535),
-               Mode, 0);
+               Mode, 0, 0);
 
       declare
          use Storage_Element_IO;
@@ -202,6 +202,59 @@ package body WL.Binary_IO is
    is
    begin
       Copy (File, Offset, 1, Item'Address);
+   end Read;
+
+   ----------
+   -- Read --
+   ----------
+
+   procedure Read (File   : in out File_Type;
+                   Item   :    out Word_32)
+   is
+   begin
+      Read (File, Item'Size, Item'Address);
+   end Read;
+
+   ----------
+   -- Read --
+   ----------
+
+   procedure Read (File   : in out File_Type;
+                   Item   :    out Word_16)
+   is
+   begin
+      Read (File, Item'Size, Item'Address);
+   end Read;
+
+   ----------
+   -- Read --
+   ----------
+
+   procedure Read (File   : in out File_Type;
+                   Item   :    out Word_8)
+   is
+   begin
+      Read (File, Item'Size, Item'Address);
+   end Read;
+
+   ----------
+   -- Read --
+   ----------
+
+   procedure Read (File        : in out File_Type;
+                   Size        : in     Word_32;
+                   Destination : in     System.Address)
+   is
+      use System.Storage_Elements;
+      Data         : constant access Storage_Array := File.Data;
+      Unit_Size    : constant Word_32 := Size / System.Storage_Unit;
+      Local_Buffer : Storage_Array (0 .. Storage_Count (Unit_Size) - 1);
+      for Local_Buffer'Address use Destination;
+   begin
+      Local_Buffer := Data (Data'First + Storage_Offset (File.Offset) ..
+                              Data'First +
+                                Storage_Offset (File.Offset + Unit_Size) - 1);
+      File.Offset := File.Offset + Unit_Size;
    end Read;
 
    -----------
