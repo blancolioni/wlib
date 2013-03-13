@@ -20,6 +20,11 @@ package WL.Bitmap_IO is
       Value         : Integer)
       return Colour_Type;
 
+   function Adjust_Brightness
+     (Colour     : Colour_Type;
+      Factor     : Float)
+      return Colour_Type;
+
    procedure Read (Bitmap    : out Bitmap_Type;
                    File_Name : in  String);
 
