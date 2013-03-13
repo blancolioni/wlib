@@ -158,6 +158,7 @@ package body WL.Binary_IO is
    begin
       File.Data :=
         new System.Storage_Elements.Storage_Array (0 .. Length - 1);
+      File.Mode := In_File;
 
       Open (Seq_File, In_File, Name);
 
