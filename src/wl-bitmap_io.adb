@@ -49,6 +49,31 @@ package body WL.Bitmap_IO is
 
    for Bitmap_Information_Header'Size use 40 * 8;
 
+   -----------------------
+   -- Adjust_Brightness --
+   -----------------------
+
+   function Adjust_Brightness
+     (Colour     : Colour_Type;
+      Factor     : Float)
+      return Colour_Type
+   is
+      R : constant Float :=
+            Float'Min
+              (Float (Colour.R) * Factor, 255.0);
+      G : constant Float :=
+            Float'Min
+              (Float (Colour.G) * Factor, 255.0);
+      B : constant Float :=
+            Float'Min
+              (Float (Colour.B) * Factor, 255.0);
+   begin
+      return (R => Colour_Element (R),
+              G => Colour_Element (G),
+              B => Colour_Element (B),
+              Alpha => 255);
+   end Adjust_Brightness;
+
    -----------
    -- Close --
    -----------
