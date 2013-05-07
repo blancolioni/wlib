@@ -17,7 +17,7 @@ package WL.Shape_Files is
       Polyline_Shape,
       Polygon_Shape);
 
-   type Shape (Class : Shape_Class) is private;
+   type Shape_Type (Class : Shape_Class) is private;
 
    function End_Of_File
      (File : File_Type)
@@ -25,8 +25,16 @@ package WL.Shape_Files is
 
    function Next
      (File : in out File_Type)
-      return Shape
+      return Shape_Type
    with Pre => not End_Of_File (File);
+
+   function Point_Count (Shape : Shape_Type) return Natural;
+   function Point_X (Shape : Shape_Type;
+                     Index : Positive)
+                     return Long_Float;
+   function Point_Y (Shape : Shape_Type;
+                     Index : Positive)
+                     return Long_Float;
 
 private
 
@@ -97,7 +105,7 @@ private
    package Shape_Point_Vectors is
      new Ada.Containers.Vectors (Positive, Shape_Point);
 
-   type Shape (Class : Shape_Class) is
+   type Shape_Type (Class : Shape_Class) is
       record
          case Class is
             when Null_Shape =>

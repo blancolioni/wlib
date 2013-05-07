@@ -62,7 +62,7 @@ package body WL.Shape_Files is
 
    function Next
      (File : in out File_Type)
-      return Shape
+      return Shape_Type
    is
       use System.Storage_Elements;
       Header : Record_Header;
@@ -80,7 +80,7 @@ package body WL.Shape_Files is
             & Shape_Class'Image (To_Shape_Class (Header.Shape_Type)));
       end if;
       declare
-         Result : Shape (To_Shape_Class (Header.Shape_Type));
+         Result : Shape_Type (To_Shape_Class (Header.Shape_Type));
       begin
          case Result.Class is
             when Null_Shape =>
@@ -162,6 +162,39 @@ package body WL.Shape_Files is
                               (To_Shape_Class (File.Header.Shape_Type)));
 
    end Open;
+
+   -----------------
+   -- Point_Count --
+   -----------------
+
+   function Point_Count (Shape : Shape_Type) return Natural is
+   begin
+      return Shape.Polygon_Points.Last_Index;
+   end Point_Count;
+
+   -------------
+   -- Point_X --
+   -------------
+
+   function Point_X (Shape : Shape_Type;
+                     Index : Positive)
+                     return Long_Float
+   is
+   begin
+      return Shape.Polygon_Points.Element (Index).X;
+   end Point_X;
+
+   -------------
+   -- Point_Y --
+   -------------
+
+   function Point_Y (Shape : Shape_Type;
+                     Index : Positive)
+                     return Long_Float
+   is
+   begin
+      return Shape.Polygon_Points.Element (Index).Y;
+   end Point_Y;
 
    --------------------
    -- To_Shape_Class --
