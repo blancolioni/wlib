@@ -1,5 +1,4 @@
-with System;
-private with System.Storage_Elements;
+with System.Storage_Elements;
 
 package WL.Binary_IO is
 
@@ -29,6 +28,9 @@ package WL.Binary_IO is
 
    procedure Read (File   : in out File_Type;
                    Item   :    out Word_8);
+
+   procedure Read (File   : in out File_Type;
+                   Item   :    out System.Storage_Elements.Storage_Array);
 
    procedure Read (File        : in out File_Type;
                    Size        : in     Word_32;
@@ -67,6 +69,8 @@ package WL.Binary_IO is
    function Hex_Image (Value : Word_32) return String;
    function Hex_Image (Value : Word_16) return String;
    function Hex_Image (Value : Word_8) return String;
+
+   function End_Of_File (File : File_Type) return Boolean;
 
 private
 
