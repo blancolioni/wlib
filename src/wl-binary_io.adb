@@ -85,6 +85,15 @@ package body WL.Binary_IO is
 
    end Create;
 
+   -----------------
+   -- End_Of_File --
+   -----------------
+
+   function End_Of_File (File : File_Type) return Boolean is
+   begin
+      return File.Offset > Word_32 (File.Data'Last);
+   end End_Of_File;
+
    ---------------
    -- Hex_Image --
    ---------------
@@ -233,6 +242,17 @@ package body WL.Binary_IO is
 
    procedure Read (File   : in out File_Type;
                    Item   :    out Word_8)
+   is
+   begin
+      Read (File, Item'Size, Item'Address);
+   end Read;
+
+   ----------
+   -- Read --
+   ----------
+
+   procedure Read (File   : in out File_Type;
+                   Item   :    out System.Storage_Elements.Storage_Array)
    is
    begin
       Read (File, Item'Size, Item'Address);
