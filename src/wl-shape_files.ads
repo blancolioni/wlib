@@ -1,4 +1,5 @@
 private with Ada.Containers.Vectors;
+private with Ada.Containers.Indefinite_Doubly_Linked_Lists;
 private with WL.Binary_IO;
 
 package WL.Shape_Files is
@@ -82,12 +83,6 @@ private
 
    for File_Header'Size use 800;
 
-   type File_Type is
-      record
-         File   : WL.Binary_IO.File_Type;
-         Header : File_Header;
-      end record;
-
    type Bounding_Rectangle is
       record
          Min_X, Min_Y, Max_X, Max_Y : Long_Float;
@@ -116,6 +111,16 @@ private
                Polygon_Bound : Bounding_Rectangle;
                Polygon_Points : Shape_Point_Vectors.Vector;
          end case;
+      end record;
+
+   package Shape_Lists is
+     new Ada.Containers.Indefinite_Doubly_Linked_Lists (Shape_Type);
+
+   type File_Type is
+      record
+         File         : WL.Binary_IO.File_Type;
+         Header       : access File_Header;
+         Shapes       : Shape_Lists.List;
       end record;
 
 end WL.Shape_Files;
