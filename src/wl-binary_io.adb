@@ -219,6 +219,48 @@ package body WL.Binary_IO is
    ----------
 
    procedure Read (File   : in out File_Type;
+                   Item   :    out String)
+   is
+      X : Word_8;
+   begin
+      for I in Item'Range loop
+         Read (File, X);
+         Item (I) := Character'Val (X);
+      end loop;
+   end Read;
+
+   ----------
+   -- Read --
+   ----------
+
+   function Read (File   : File_Type;
+                  Offset : Word_32;
+                  Terminator : Character := Character'Val (0))
+                  return String
+   is
+      Current : Word_32 := Offset;
+      X       : Word_8;
+      Index   : Natural := 0;
+      Result  : String (1 .. 64);
+   begin
+      loop
+         Read (File, X, Current);
+         exit when X = Character'Pos (Terminator);
+         Current := Current + 1;
+         Index := Index + 1;
+         Result (Index) := Character'Val (X);
+         if Index = Result'Last then
+            return Result & Read (File, Current, Terminator);
+         end if;
+      end loop;
+      return Result (1 .. Index);
+   end Read;
+
+   ----------
+   -- Read --
+   ----------
+
+   procedure Read (File   : in out File_Type;
                    Item   :    out Word_32)
    is
    begin
@@ -262,6 +304,25 @@ package body WL.Binary_IO is
    -- Read --
    ----------
 
+   procedure Read
+     (File    : in out File_Type;
+      Item    :    out System.Storage_Elements.Storage_Array;
+      Offset  : Word_32)
+   is
+      Current : Word_32 := Offset;
+      X : Word_8;
+   begin
+      for I in Item'Range loop
+         Read (File, X, Current);
+         Item (I) := System.Storage_Elements.Storage_Element (X);
+         Current := Current + 1;
+      end loop;
+   end Read;
+
+   ----------
+   -- Read --
+   ----------
+
    procedure Read (File        : in out File_Type;
                    Size        : in     Word_32;
                    Destination : in     System.Address)
@@ -277,6 +338,17 @@ package body WL.Binary_IO is
                                 Storage_Offset (File.Offset + Unit_Size) - 1);
       File.Offset := File.Offset + Unit_Size;
    end Read;
+
+   ----------------
+   -- Set_Offset --
+   ----------------
+
+   procedure Set_Offset (File : in out File_Type;
+                         Offset : in Word_32)
+   is
+   begin
+      File.Offset := Offset;
+   end Set_Offset;
 
    -----------
    -- Write --

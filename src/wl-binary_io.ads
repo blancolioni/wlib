@@ -30,7 +30,15 @@ package WL.Binary_IO is
                    Item   :    out Word_8);
 
    procedure Read (File   : in out File_Type;
+                   Item   :    out String);
+
+   procedure Read (File   : in out File_Type;
                    Item   :    out System.Storage_Elements.Storage_Array);
+
+   procedure Read
+     (File    : in out File_Type;
+      Item    :    out System.Storage_Elements.Storage_Array;
+      Offset  : Word_32);
 
    procedure Read (File        : in out File_Type;
                    Size        : in     Word_32;
@@ -47,6 +55,11 @@ package WL.Binary_IO is
    procedure Read (File   : in     File_Type;
                    Item   :    out Word_8;
                    Offset : in     Word_32);
+
+   function Read (File   : File_Type;
+                  Offset : Word_32;
+                  Terminator : Character := Character'Val (0))
+                  return String;
 
    procedure Write (File   : in out File_Type;
                     Item   : in     Word_32);
@@ -65,6 +78,9 @@ package WL.Binary_IO is
    procedure Write (File   : in out File_Type;
                     Length  : in     Word_32;
                     Source  : in     System.Address);
+
+   procedure Set_Offset (File : in out File_Type;
+                         Offset : in Word_32);
 
    function Hex_Image (Value : Word_32) return String;
    function Hex_Image (Value : Word_16) return String;
