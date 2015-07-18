@@ -219,6 +219,39 @@ package body WL.Binary_IO is
    ----------
 
    procedure Read (File   : in out File_Type;
+                   Item   :    out Integer_32)
+   is
+   begin
+      Read (File, Item'Size, Item'Address);
+   end Read;
+
+   ----------
+   -- Read --
+   ----------
+
+   procedure Read (File   : in out File_Type;
+                   Item   :    out Integer_16)
+   is
+   begin
+      Read (File, Item'Size, Item'Address);
+   end Read;
+
+   ----------
+   -- Read --
+   ----------
+
+   procedure Read (File   : in out File_Type;
+                   Item   :    out Integer_8)
+   is
+   begin
+      Read (File, Item'Size, Item'Address);
+   end Read;
+
+   ----------
+   -- Read --
+   ----------
+
+   procedure Read (File   : in out File_Type;
                    Item   :    out String)
    is
       X : Word_8;
