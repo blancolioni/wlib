@@ -30,7 +30,16 @@ package body WL.Random.Names is
          Open (File, In_File, Path);
          while not End_Of_File (File) loop
             declare
-               Line : constant String := Get_Line (File);
+               Full_Line : constant String := Get_Line (File);
+               Last_CR   : constant Boolean :=
+                             Full_Line'Length > 0
+                                 and then Character'Pos
+                                   (Full_Line (Full_Line'Last)) = 13;
+               Line      : constant String :=
+                             (if Last_CR
+                              then Full_Line
+                                (Full_Line'First .. Full_Line'Last - 1)
+                              else Full_Line);
                Lex  : constant String := Line (Line'First + 1 .. Line'Last);
                Flags : constant Natural :=
                          Natural'Value (Line (Line'First .. Line'First));
@@ -50,7 +59,6 @@ package body WL.Random.Names is
       Load_Info (Vowels_Path, Generator.Vowels);
       Load_Info (Consonants_Path, Generator.Consonants);
    end Load_Lexicon;
-
 
    -----------------
    -- Random_Name --
