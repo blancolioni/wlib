@@ -211,6 +211,7 @@ package body WL.Bitmap_IO is
          Indices      => null,
          Colourmap    => null);
    begin
+      Result.Data.all := (others => (others => (0, 0, 0, 1)));
       return Result;
    end New_Bitmap;
 
