@@ -178,7 +178,7 @@ package body WL.Work is
    begin
       loop
          Scheduler.Next_Job (Current);
-         exit when Current.Handle = 0;
+         exit when Current = null or else Current.Handle = 0;
          Current.Execute;
          Handle_Factory.Manager (Current.Handle).Job_Finished (Current);
       end loop;
@@ -220,7 +220,7 @@ package body WL.Work is
       is
       begin
          if Stopped then
-            Job.Handle := 0;
+            Job := null;
          else
             Job := List.First_Element;
             List.Delete_First;
