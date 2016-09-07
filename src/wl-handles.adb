@@ -1,8 +1,14 @@
+with Ada.Unchecked_Deallocation;
+
 package body WL.Handles is
+
+   procedure Free is
+     new Ada.Unchecked_Deallocation
+       (Item_Type, Item_Access);
 
    type Node_Type is
       limited record
-         Item  : aliased Item_Type;
+         Item  : Item_Access;
          Count : Natural;
          Next  : Node_Access;
       end record;
@@ -15,14 +21,19 @@ package body WL.Handles is
 
    overriding procedure Adjust (Handle : in out Handle_Type) is
    begin
-      Handle.Node.Count := Handle.Node.Count + 1;
+      if Handle.Node /= null then
+         Handle.Node.Count := Handle.Node.Count + 1;
+      end if;
    end Adjust;
 
    ------------
    -- Create --
    ------------
 
-   function Create return Handle_Type is
+   function Create
+     (Item : Item_Type)
+      return Handle_Type
+   is
 
       Node : Node_Access;
 
@@ -42,6 +53,7 @@ package body WL.Handles is
       end if;
 
       Node.Count := 1;
+      Node.Item := new Item_Type'(Item);
 
       return (Ada.Finalization.Controlled with Node);
 
@@ -54,15 +66,17 @@ package body WL.Handles is
    overriding procedure Finalize (Handle : in out Handle_Type) is
    begin
 
-      Handle.Node.Count := Handle.Node.Count - 1;
+      if Handle.Node /= null then
+         Handle.Node.Count := Handle.Node.Count - 1;
 
-      if Handle.Node.Count = 0 then
+         if Handle.Node.Count = 0 then
 
-         Handle.Node.Next := Free_List;
-         Free_List := Handle.Node;
+            Free (Handle.Node.Item);
+            Handle.Node.Next := Free_List;
+            Free_List := Handle.Node;
 
+         end if;
       end if;
-
    end Finalize;
 
    ---------
@@ -72,7 +86,7 @@ package body WL.Handles is
    function Get
      (Handle : Handle_Type) return Item_Type is
    begin
-      return Handle.Node.Item;
+      return Handle.Node.Item.all;
    end Get;
 
    ---------
@@ -82,7 +96,7 @@ package body WL.Handles is
    function Set
      (Handle : Handle_Type) return Item_Access is
    begin
-      return Handle.Node.Item'Access;
+      return Handle.Node.Item;
    end Set;
 
 end WL.Handles;

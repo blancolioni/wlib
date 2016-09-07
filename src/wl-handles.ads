@@ -1,7 +1,7 @@
 private with Ada.Finalization;
 
 generic
-   type Item_Type is private;
+   type Item_Type (<>) is private;
 package WL.Handles is
 
    type Handle_Type is tagged private;
@@ -9,9 +9,10 @@ package WL.Handles is
    Null_Handle : constant Handle_Type;
 
    type Item_Access is access all Item_Type;
-   for Item_Access'Storage_Size use 0;
 
-   function Create return Handle_Type;
+   function Create
+     (Item : Item_Type)
+     return Handle_Type;
 
    function Get
      (Handle : Handle_Type) return Item_Type;
