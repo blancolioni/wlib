@@ -4,7 +4,7 @@ generic
    type Item_Type (<>) is private;
 package WL.Handles is
 
-   type Handle_Type is tagged private;
+   type Handle_Type is private;
 
    Null_Handle : constant Handle_Type;
 
@@ -13,6 +13,10 @@ package WL.Handles is
    function Create
      (Item : Item_Type)
      return Handle_Type;
+
+   function Is_Null
+     (Handle : Handle_Type)
+      return Boolean;
 
    function Get
      (Handle : Handle_Type) return Item_Type;

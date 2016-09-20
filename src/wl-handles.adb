@@ -89,6 +89,18 @@ package body WL.Handles is
       return Handle.Node.Item.all;
    end Get;
 
+   -------------
+   -- Is_Null --
+   -------------
+
+   function Is_Null
+     (Handle : Handle_Type)
+      return Boolean
+   is
+   begin
+      return Handle.Node = null;
+   end Is_Null;
+
    ---------
    -- Set --
    ---------
