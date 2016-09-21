@@ -1,16 +1,16 @@
 with Ada.Directories;
-with Ada.Sequential_IO;
+with Ada.Streams.Stream_IO;
 with Ada.Unchecked_Deallocation;
 
 package body WL.Binary_IO is
 
-   package Storage_Element_IO is
-     new Ada.Sequential_IO (System.Storage_Elements.Storage_Element);
-
    procedure Free is
      new Ada.Unchecked_Deallocation
-       (System.Storage_Elements.Storage_Array,
-        Storage_Array_Access);
+       (Ada.Streams.Stream_Element_Array,
+        Stream_Array_Access);
+
+   procedure Flush
+     (File : File_Type);
 
    -----------
    -- Close --
@@ -19,25 +19,11 @@ package body WL.Binary_IO is
    procedure Close (File : in out File_Type) is
    begin
       if File.Mode = Out_File then
-         declare
-            use Storage_Element_IO;
-            use type System.Storage_Elements.Storage_Offset;
-            Seq_File   : Storage_Element_IO.File_Type;
-         begin
-            Open (Seq_File, Append_File, File.Path.all);
-
-            for I in 0 .. File.Size - 1 loop
-               Write (Seq_File, File.Data (I));
-            end loop;
-
-            Close (Seq_File);
-
-         end;
-
+         Flush (File);
       end if;
 
       if File.Data /= null then
-         Free (Storage_Array_Access (File.Data));
+         Free (File.Data);
          File.Data := null;
       end if;
 
@@ -52,14 +38,15 @@ package body WL.Binary_IO is
                    Length      : in     Word_32;
                    Destination : in     System.Address)
    is
-      use System.Storage_Elements;
-      Data         : constant access Storage_Array := File.Data;
-      Local_Buffer : Storage_Array (0 .. Storage_Count (Length) - 1);
+      use Ada.Streams;
+      Data         : constant Stream_Array_Access := File.Data;
+      Local_Buffer : Stream_Element_Array
+        (0 .. Stream_Element_Count (Length) - 1);
       for Local_Buffer'Address use Destination;
    begin
-      Local_Buffer := Data (Data'First + Storage_Offset (Offset) ..
+      Local_Buffer := Data (Data'First + Stream_Element_Offset (Offset) ..
                               Data'First +
-                                Storage_Offset (Offset + Length) - 1);
+                                Stream_Element_Offset (Offset + Length) - 1);
    end Copy;
 
    ------------
@@ -71,16 +58,15 @@ package body WL.Binary_IO is
                      Name : in     String)
    is
    begin
-      File := (new String'(Name),
-               new System.Storage_Elements.Storage_Array (0 .. 65535),
+      File := (Ada.Strings.Unbounded.To_Unbounded_String (Name),
+               new Ada.Streams.Stream_Element_Array (0 .. 65535),
                Mode, 0, 0);
-
       declare
-         use Storage_Element_IO;
-         Seq_File   : Storage_Element_IO.File_Type;
+         use Ada.Streams.Stream_IO;
+         Stream : File_Type;
       begin
-         Create (Seq_File, Out_File, File.Path.all);
-         Close (Seq_File);
+         Create (Stream, Out_File, Name);
+         Close (Stream);
       end;
 
    end Create;
@@ -102,6 +88,29 @@ package body WL.Binary_IO is
    begin
       return File.Offset > Word_32 (File.Data'Last);
    end End_Of_File;
+
+   -----------
+   -- Flush --
+   -----------
+
+   procedure Flush
+     (File : File_Type)
+   is
+      use Ada.Streams.Stream_IO;
+      Stream : Ada.Streams.Stream_IO.File_Type;
+      Path   : constant String :=
+                 Ada.Strings.Unbounded.To_String (File.Path);
+   begin
+      if Ada.Directories.Exists (Path) then
+         Open (Stream, Append_File, Path);
+      else
+         Create (Stream, Out_File, Path);
+      end if;
+
+      Write (Stream, File.Data (0 .. File.Size));
+
+      Close (Stream);
+   end Flush;
 
    ---------------
    -- Hex_Image --
@@ -167,24 +176,25 @@ package body WL.Binary_IO is
                    Mode : in     File_Mode;
                    Name : in     String)
    is
-      pragma Unreferenced (Mode);
-      use System.Storage_Elements;
-      use Storage_Element_IO;
-      Length     : constant Storage_Count :=
-                     Storage_Count (Ada.Directories.Size (Name));
-      Seq_File   : Storage_Element_IO.File_Type;
+      pragma Assert (Mode = In_File);
+      use Ada.Streams;
+      Length     : constant Stream_Element_Count :=
+                     Stream_Element_Count (Ada.Directories.Size (Name));
+      Stream     : Ada.Streams.Stream_IO.File_Type;
+      Last       : Stream_Element_Offset;
    begin
       File.Data :=
-        new System.Storage_Elements.Storage_Array (0 .. Length - 1);
+        new Stream_Element_Array (0 .. Length - 1);
       File.Mode := In_File;
 
-      Open (Seq_File, In_File, Name);
+      Ada.Streams.Stream_IO.Open
+        (Stream, Ada.Streams.Stream_IO.In_File, Name);
 
-      for I in File.Data'Range loop
-         Read (Seq_File, File.Data (I));
-      end loop;
+      Ada.Streams.Stream_IO.Read (Stream, File.Data.all, Last);
+      pragma Assert (Last = Length);
 
-      Close (Seq_File);
+      Ada.Streams.Stream_IO.Close (Stream);
+
    end Open;
 
    ----------
@@ -335,49 +345,24 @@ package body WL.Binary_IO is
    -- Read --
    ----------
 
-   procedure Read (File   : in out File_Type;
-                   Item   :    out System.Storage_Elements.Storage_Array)
-   is
-   begin
-      Read (File, Item'Size, Item'Address);
-   end Read;
-
-   ----------
-   -- Read --
-   ----------
-
-   procedure Read
-     (File    : in out File_Type;
-      Item    :    out System.Storage_Elements.Storage_Array;
-      Offset  : Word_32)
-   is
-      Current : Word_32 := Offset;
-      X : Word_8;
-   begin
-      for I in Item'Range loop
-         Read (File, X, Current);
-         Item (I) := System.Storage_Elements.Storage_Element (X);
-         Current := Current + 1;
-      end loop;
-   end Read;
-
-   ----------
-   -- Read --
-   ----------
-
    procedure Read (File        : in out File_Type;
                    Size        : in     Word_32;
                    Destination : in     System.Address)
    is
-      use System.Storage_Elements;
-      Data         : constant access Storage_Array := File.Data;
-      Unit_Size    : constant Word_32 := Size / System.Storage_Unit;
-      Local_Buffer : Storage_Array (0 .. Storage_Count (Unit_Size) - 1);
+      use Ada.Streams;
+      Data         : constant Stream_Array_Access := File.Data;
+      Unit_Size    : constant Word_32 :=
+                       Size / Stream_Element'Size;
+      Local_Buffer : Stream_Element_Array
+        (0 .. Stream_Element_Count (Unit_Size) - 1);
       for Local_Buffer'Address use Destination;
+      Start        : constant Stream_Element_Offset :=
+                       Data'First + Stream_Element_Offset (File.Offset);
+      Finish       : constant Stream_Element_Offset :=
+                       Data'First +
+                         Stream_Element_Offset (File.Offset + Unit_Size) - 1;
    begin
-      Local_Buffer := Data (Data'First + Storage_Offset (File.Offset) ..
-                              Data'First +
-                                Storage_Offset (File.Offset + Unit_Size) - 1);
+      Local_Buffer := Data (Start .. Finish);
       File.Offset := File.Offset + Unit_Size;
    end Read;
 
@@ -392,6 +377,20 @@ package body WL.Binary_IO is
       File.Offset := Offset;
    end Set_Offset;
 
+   ----------
+   -- View --
+   ----------
+
+   function View
+     (File : File_Type)
+      return File_Type
+   is
+   begin
+      return View_File : File_Type := File do
+         View_File.Mode := In_File;
+      end return;
+   end View;
+
    -----------
    -- Write --
    -----------
@@ -399,25 +398,13 @@ package body WL.Binary_IO is
    procedure Write (File   : in out File_Type;
                     Item   : in     Word_8)
    is
-      use System.Storage_Elements;
+      use Ada.Streams;
    begin
       if File.Data'Last + 1 = File.Size then
-         declare
-            use Storage_Element_IO;
-            Seq_File   : Storage_Element_IO.File_Type;
-         begin
-            Open (Seq_File, Append_File, File.Path.all);
-
-            for I in 0 .. File.Size - 1 loop
-               Write (Seq_File, File.Data (I));
-            end loop;
-
-            Close (Seq_File);
-
-            File.Size := 0;
-         end;
+         Flush (File);
+         File.Size := 0;
       end if;
-      File.Data (File.Size) := Storage_Element (Item);
+      File.Data (File.Size) := Stream_Element (Item);
       File.Size := File.Size + 1;
    end Write;
 
@@ -451,8 +438,8 @@ package body WL.Binary_IO is
                     Length  : in     Word_32;
                     Source  : in     System.Address)
    is
-      use System.Storage_Elements;
-      Data : Storage_Array (1 .. Storage_Count (Length));
+      use Ada.Streams;
+      Data : Stream_Element_Array (1 .. Stream_Element_Count (Length));
       for Data'Address use Source;
    begin
       for I in Data'Range loop
