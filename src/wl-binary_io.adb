@@ -85,6 +85,15 @@ package body WL.Binary_IO is
 
    end Create;
 
+   --------------------
+   -- Current_Offset --
+   --------------------
+
+   function Current_Offset (File : File_Type) return Word_32 is
+   begin
+      return File.Offset;
+   end Current_Offset;
+
    -----------------
    -- End_Of_File --
    -----------------
