@@ -1,4 +1,7 @@
-with System.Storage_Elements;
+private with Ada.Streams;
+private with Ada.Strings.Unbounded;
+
+with System;
 
 package WL.Binary_IO is
 
@@ -13,6 +16,10 @@ package WL.Binary_IO is
    procedure Create (File : in out File_Type;
                      Mode : in     File_Mode;
                      Name : in     String);
+
+   function View
+     (File : File_Type)
+      return File_Type;
 
    procedure Close (File : in out File_Type);
 
@@ -44,14 +51,6 @@ package WL.Binary_IO is
 
    procedure Read (File   : in out File_Type;
                    Item   :    out String);
-
-   procedure Read (File   : in out File_Type;
-                   Item   :    out System.Storage_Elements.Storage_Array);
-
-   procedure Read
-     (File    : in out File_Type;
-      Item    :    out System.Storage_Elements.Storage_Array;
-      Offset  : Word_32);
 
    procedure Read (File        : in out File_Type;
                    Size        : in     Word_32;
@@ -105,15 +104,15 @@ package WL.Binary_IO is
 
 private
 
-   type Storage_Array_Access is
-     access all System.Storage_Elements.Storage_Array;
+   type Stream_Array_Access is
+     access all Ada.Streams.Stream_Element_Array;
 
    type File_Type is
       record
-         Path   : access String;
-         Data   : Storage_Array_Access;
+         Path   : Ada.Strings.Unbounded.Unbounded_String;
+         Data   : Stream_Array_Access;
          Mode   : File_Mode;
-         Size   : System.Storage_Elements.Storage_Count;
+         Size   : Ada.Streams.Stream_Element_Count;
          Offset : Word_32 := 0;
       end record;
 
