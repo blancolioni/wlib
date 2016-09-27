@@ -67,14 +67,16 @@ package body WL.Handles is
    begin
 
       if Handle.Node /= null then
-         Handle.Node.Count := Handle.Node.Count - 1;
+         if Handle.Node.Count > 0 then
+            Handle.Node.Count := Handle.Node.Count - 1;
 
-         if Handle.Node.Count = 0 then
+            if Handle.Node.Count = 0 then
 
-            Free (Handle.Node.Item);
-            Handle.Node.Next := Free_List;
-            Free_List := Handle.Node;
+               Free (Handle.Node.Item);
+               Handle.Node.Next := Free_List;
+               Free_List := Handle.Node;
 
+            end if;
          end if;
       end if;
    end Finalize;
