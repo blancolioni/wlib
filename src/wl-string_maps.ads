@@ -28,4 +28,7 @@ package WL.String_Maps is
    function Element (Position : Cursor) return Element_Type
                      renames Maps.Element;
 
+   procedure Next (Position : in out Cursor)
+                   renames Maps.Next;
+
 end WL.String_Maps;
