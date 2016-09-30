@@ -62,11 +62,11 @@ package body WL.Binary_IO is
                new Ada.Streams.Stream_Element_Array (0 .. 65535),
                Mode, 0, 0);
       declare
-         use Ada.Streams.Stream_IO;
-         Stream : File_Type;
+         Stream : Ada.Streams.Stream_IO.File_Type;
       begin
-         Create (Stream, Out_File, Name);
-         Close (Stream);
+         Ada.Streams.Stream_IO.Create
+           (Stream, Ada.Streams.Stream_IO.Out_File, Name);
+         Ada.Streams.Stream_IO.Close (Stream);
       end;
 
    end Create;
