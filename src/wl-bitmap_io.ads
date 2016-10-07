@@ -1,3 +1,5 @@
+with WL.Binary_IO;
+
 package WL.Bitmap_IO is
 
    type Bitmap_Type is private;
@@ -27,6 +29,9 @@ package WL.Bitmap_IO is
 
    procedure Read (Bitmap    : out Bitmap_Type;
                    File_Name : in  String);
+
+   procedure Read (Bitmap  : out Bitmap_Type;
+                   File    : in out WL.Binary_IO.File_Type);
 
    procedure Write (Bitmap    : in Bitmap_Type;
                     File_Name : in String);
