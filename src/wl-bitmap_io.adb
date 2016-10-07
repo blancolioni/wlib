@@ -420,7 +420,10 @@ package body WL.Bitmap_IO is
       for Y in 0 .. Bitmap.Height - 1 loop
          for X in 0 .. Bitmap.Width - 1 loop
             declare
-               Colour : constant Colour_Type := Bitmap.Data (X, Y);
+               Colour : constant Colour_Type :=
+                          (if Bitmap.Depth >= 24
+                           then Bitmap.Data (X, Y)
+                           else Bitmap.Colourmap (Bitmap.Indices (X, Y)));
             begin
                Write (File, Word_8 (Colour.B));
                Write (File, Word_8 (Colour.G));
