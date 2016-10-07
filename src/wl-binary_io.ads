@@ -31,6 +31,12 @@ package WL.Binary_IO is
    type Integer_16 is range -2 ** 15 .. 2 ** 15 - 1 with Size => 16;
    type Integer_8 is range -2 ** 7 .. 2 ** 7 - 1 with Size => 8;
 
+   function View
+     (File   : File_Type;
+      Start  : Word_32;
+      Length : Word_32)
+      return File_Type;
+
    procedure Read (File   : in out File_Type;
                    Item   :    out Word_32);
 
@@ -114,6 +120,7 @@ private
          Mode   : File_Mode;
          Size   : Ada.Streams.Stream_Element_Count;
          Offset : Word_32 := 0;
+         Start  : Word_32 := 0;
       end record;
 
 end WL.Binary_IO;

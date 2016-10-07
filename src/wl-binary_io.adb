@@ -43,10 +43,15 @@ package body WL.Binary_IO is
       Local_Buffer : Stream_Element_Array
         (0 .. Stream_Element_Count (Length) - 1);
       for Local_Buffer'Address use Destination;
+      Start        : constant Stream_Element_Offset :=
+                       Data'First
+                         + Stream_Element_Offset (File.Start + Offset);
+      Finish       : constant Stream_Element_Offset :=
+                       Data'First
+                         + Stream_Element_Offset (File.Start + Offset + Length
+                                                    - 1);
    begin
-      Local_Buffer := Data (Data'First + Stream_Element_Offset (Offset) ..
-                              Data'First +
-                                Stream_Element_Offset (Offset + Length) - 1);
+      Local_Buffer := Data (Start .. Finish);
    end Copy;
 
    ------------
@@ -60,7 +65,7 @@ package body WL.Binary_IO is
    begin
       File := (Ada.Strings.Unbounded.To_Unbounded_String (Name),
                new Ada.Streams.Stream_Element_Array (0 .. 65535),
-               Mode, 0, 0);
+               Mode, 0, 0, 0);
       declare
          Stream : Ada.Streams.Stream_IO.File_Type;
       begin
@@ -86,7 +91,7 @@ package body WL.Binary_IO is
 
    function End_Of_File (File : File_Type) return Boolean is
    begin
-      return File.Offset > Word_32 (File.Data'Last);
+      return File.Offset >= Word_32 (File.Size);
    end End_Of_File;
 
    -----------
@@ -187,6 +192,7 @@ package body WL.Binary_IO is
         new Stream_Element_Array (0 .. Length - 1);
       File.Mode := In_File;
       File.Size := Length;
+      File.Start := 0;
       Ada.Streams.Stream_IO.Open
         (Stream, Ada.Streams.Stream_IO.In_File, Name);
 
@@ -290,7 +296,7 @@ package body WL.Binary_IO is
                   Terminator : Character := Character'Val (0))
                   return String
    is
-      Current : Word_32 := Offset;
+      Current : Word_32 := File.Start + Offset;
       X       : Word_8;
       Index   : Natural := 0;
       Result  : String (1 .. 64);
@@ -357,10 +363,12 @@ package body WL.Binary_IO is
         (0 .. Stream_Element_Count (Unit_Size) - 1);
       for Local_Buffer'Address use Destination;
       Start        : constant Stream_Element_Offset :=
-                       Data'First + Stream_Element_Offset (File.Offset);
+                       Data'First
+                         + Stream_Element_Offset (File.Offset + File.Start);
       Finish       : constant Stream_Element_Offset :=
                        Data'First +
-                         Stream_Element_Offset (File.Offset + Unit_Size) - 1;
+                         Stream_Element_Offset
+                           (File.Offset + File.Start + Unit_Size) - 1;
    begin
       Local_Buffer := Data (Start .. Finish);
       File.Offset := File.Offset + Unit_Size;
@@ -388,6 +396,24 @@ package body WL.Binary_IO is
    begin
       return View_File : File_Type := File do
          View_File.Mode := In_File;
+      end return;
+   end View;
+
+   ----------
+   -- View --
+   ----------
+
+   function View
+     (File   : File_Type;
+      Start  : Word_32;
+      Length : Word_32)
+      return File_Type
+   is
+   begin
+      return View_File : File_Type := File do
+         View_File.Mode := In_File;
+         View_File.Start := Start;
+         View_File.Size := Ada.Streams.Stream_Element_Count (Length);
       end return;
    end View;
 
