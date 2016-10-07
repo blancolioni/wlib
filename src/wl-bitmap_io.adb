@@ -1,9 +1,9 @@
 with Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
-with WL.Binary_IO;                         use WL.Binary_IO;
-
 package body WL.Bitmap_IO is
+
+   use WL.Binary_IO;
 
    procedure Free is
      new Ada.Unchecked_Deallocation (Bitmap_Data,
@@ -223,6 +223,19 @@ package body WL.Bitmap_IO is
                    File_Name : in  String)
    is
       File           : File_Type;
+   begin
+      Open (File, In_File, File_Name);
+      Read (Bitmap, File);
+      Close (File);
+   end Read;
+
+   ----------
+   -- Read --
+   ----------
+
+   procedure Read (Bitmap  : out Bitmap_Type;
+                   File    : in out WL.Binary_IO.File_Type)
+   is
       Magic          : Bitmap_Magic;
       Header         : Bitmap_Header;
       Info_Header    : Bitmap_Information_Header;
@@ -230,13 +243,11 @@ package body WL.Bitmap_IO is
       BPP            : Word_32;
       Used           : array (Colour_Element) of Natural;
    begin
-      Open (File, In_File, File_Name);
-
       Copy (File, 0, 2, Magic'Address);
       if Magic /= "BM" then
          Close (File);
          raise Constraint_Error with
-           "bad magic number";
+           "bad magic number: " & String (Magic);
       end if;
 
       Copy (File, 2, Header'Size / 8, Header'Address);
