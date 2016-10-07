@@ -186,7 +186,7 @@ package body WL.Binary_IO is
       File.Data :=
         new Stream_Element_Array (0 .. Length - 1);
       File.Mode := In_File;
-
+      File.Size := Length;
       Ada.Streams.Stream_IO.Open
         (Stream, Ada.Streams.Stream_IO.In_File, Name);
 
