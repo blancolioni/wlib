@@ -1,4 +1,3 @@
-with Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
 package body WL.Bitmap_IO is
@@ -253,15 +252,6 @@ package body WL.Bitmap_IO is
       Copy (File, 2, Header'Size / 8, Header'Address);
       Copy (File, 14, Info_Header'Size / 8, Info_Header'Address);
 
-      Ada.Text_IO.Put_Line ("Width       : " &
-                              Hex_Image (Info_Header.Width));
-      Ada.Text_IO.Put_Line ("Height      : " &
-                              Hex_Image (Info_Header.Height));
-      Ada.Text_IO.Put_Line ("BPP         : " &
-                              Hex_Image (Info_Header.Bits_Per_Pixel));
-      Ada.Text_IO.Put_Line ("Compression :" &
-                              Info_Header.Compression'Img);
-
       BPP := Word_32 (Info_Header.Bits_Per_Pixel);
       Bitmap.Depth := Natural (BPP);
 
@@ -296,8 +286,8 @@ package body WL.Bitmap_IO is
                                   + Word_32 (Y) * Row_Size;
                Col_Offset   : constant Word_32 :=
                                 Word_32 (X) * BPP / 8;
-               Bit_Offset   : constant Word_32 :=
-                                Word_32 (X) * BPP mod 8;
+               Bit_Offset   : constant Natural :=
+                                X * Natural (BPP) mod 8;
                Colour       : Colour_Type := (0, 0, 0, 0);
             begin
                if BPP >= 24 then
@@ -315,7 +305,7 @@ package body WL.Bitmap_IO is
                   begin
                      Read (File, W8, Row_Offset + Col_Offset);
                      if BPP < 8 then
-                        W8 := W8 / (2 ** Natural (Bit_Offset))
+                        W8 := W8 / (2 ** Bit_Offset)
                         mod (2 ** Natural (BPP));
                      end if;
                      Index := Colour_Element (W8);
@@ -330,24 +320,6 @@ package body WL.Bitmap_IO is
             end;
          end loop;
       end loop;
-
-      if BPP <= 8 then
-         Ada.Text_IO.Put_Line ("Colour map");
-         for I in Used'Range loop
-            if Used (I) > 0 then
-               Ada.Text_IO.Put_Line
-                 (Hex_Image (Word_8 (I)) &
-                    "   " &
-                    Hex_Image (Word_8 (Bitmap.Colourmap (I).R)) & " " &
-                    Hex_Image (Word_8 (Bitmap.Colourmap (I).G)) & " " &
-                    Hex_Image (Word_8 (Bitmap.Colourmap (I).B)) & " " &
-                    Colour_Element'Image (Bitmap.Colourmap (I).R) &
-                    Colour_Element'Image (Bitmap.Colourmap (I).G) &
-                    Colour_Element'Image (Bitmap.Colourmap (I).B) &
-                    Natural'Image (Used (I)));
-            end if;
-         end loop;
-      end if;
 
    end Read;
 
