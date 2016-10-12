@@ -19,6 +19,8 @@ package WL.String_Maps is
 
    subtype Cursor is Maps.Cursor;
 
+   Empty_Map : constant Map := Map'(Maps.Empty_Map with null record);
+
    function Has_Element (Position : Cursor) return Boolean
                          renames Maps.Has_Element;
 
