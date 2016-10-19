@@ -37,6 +37,8 @@ package WL.Binary_IO is
       Length : Word_32)
       return File_Type;
 
+   function Length (File : File_Type) return Word_32;
+
    procedure Read (File   : in out File_Type;
                    Item   :    out Word_32);
 
