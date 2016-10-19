@@ -173,6 +173,15 @@ package body WL.Binary_IO is
       return Result;
    end Hex_Image;
 
+   ------------
+   -- Length --
+   ------------
+
+   function Length (File : File_Type) return Word_32 is
+   begin
+      return Word_32 (File.Size);
+   end Length;
+
    ----------
    -- Open --
    ----------
