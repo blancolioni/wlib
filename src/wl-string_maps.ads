@@ -33,4 +33,7 @@ package WL.String_Maps is
    procedure Next (Position : in out Cursor)
                    renames Maps.Next;
 
+   function Next (Position : Cursor) return Cursor
+                  renames Maps.Next;
+
 end WL.String_Maps;
