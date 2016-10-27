@@ -226,6 +226,10 @@ package body WL.Bitmap_IO is
       Open (File, In_File, File_Name);
       Read (Bitmap, File);
       Close (File);
+   exception
+      when others =>
+         Close (File);
+         raise;
    end Read;
 
    ----------
@@ -244,7 +248,6 @@ package body WL.Bitmap_IO is
    begin
       Copy (File, 0, 2, Magic'Address);
       if Magic /= "BM" then
-         Close (File);
          raise Constraint_Error with
            "bad magic number: " & String (Magic);
       end if;
