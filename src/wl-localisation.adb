@@ -57,7 +57,9 @@ package body WL.Localisation is
       end Sub;
 
    begin
-      if Local_Map.Contains (Tag) then
+      if Tag = "" then
+         return "";
+      elsif Local_Map.Contains (Tag) then
          return Sub (Local_Map.Element (Tag));
       else
          return "[" & Tag & "]"
