@@ -10,6 +10,18 @@ package body WL.Localisation is
 
    Local_Map : Text_Maps.Map;
 
+   --------------------
+   -- Has_Local_Text --
+   --------------------
+
+   function Has_Local_Text
+     (Tag          : String)
+      return Boolean
+   is
+   begin
+      return Local_Map.Contains (Tag);
+   end Has_Local_Text;
+
    ----------------
    -- Local_Text --
    ----------------
@@ -94,6 +106,19 @@ package body WL.Localisation is
             end if;
          end;
       end loop;
+   end Read_Localisation;
+
+   -----------------------
+   -- Read_Localisation --
+   -----------------------
+
+   procedure Read_Localisation
+     (Language : out Language_Type;
+      Path     : String)
+   is
+   begin
+      Language := "en-uk";
+      Read_Localisation (Path);
    end Read_Localisation;
 
 end WL.Localisation;
