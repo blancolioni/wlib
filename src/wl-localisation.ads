@@ -8,6 +8,10 @@ package WL.Localisation is
       Arg_4 : String := "")
       return String;
 
+   function Local_Number
+     (Value : Natural)
+      return String;
+
    function Has_Local_Text
      (Tag          : String)
       return Boolean;
@@ -39,7 +43,11 @@ package WL.Localisation is
 
    function Local_Text
      (Localisation : Localisation_Interface;
-      Tag          : String)
+      Tag          : String;
+      Arg_1        : String := "";
+      Arg_2        : String := "";
+      Arg_3        : String := "";
+      Arg_4        : String := "")
       return String
       is abstract;
 
@@ -48,6 +56,11 @@ package WL.Localisation is
       Tag          : String)
       return Boolean
       is abstract;
+
+   function Local_Number
+     (Localisation : Localisation_Interface'Class;
+      Value        : Natural)
+      return String;
 
 private
 

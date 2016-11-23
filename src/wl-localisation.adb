@@ -22,6 +22,47 @@ package body WL.Localisation is
       return Local_Map.Contains (Tag);
    end Has_Local_Text;
 
+   ------------------
+   -- Local_Number --
+   ------------------
+
+   function Local_Number
+     (Value : Natural)
+      return String
+   is
+      Tag : constant String :=
+              Ada.Strings.Fixed.Trim
+                (Natural'Image (Value),
+                 Ada.Strings.Both);
+   begin
+      if Has_Local_Text (Tag) then
+         return Local_Text (Tag);
+      else
+         return Tag;
+      end if;
+   end Local_Number;
+
+   ------------------
+   -- Local_Number --
+   ------------------
+
+   function Local_Number
+     (Localisation : Localisation_Interface'Class;
+      Value        : Natural)
+      return String
+   is
+      Tag : constant String :=
+              Ada.Strings.Fixed.Trim
+                (Natural'Image (Value),
+                 Ada.Strings.Both);
+   begin
+      if Localisation.Has_Local_Text (Tag) then
+         return Localisation.Local_Text (Tag);
+      else
+         return Tag;
+      end if;
+   end Local_Number;
+
    ----------------
    -- Local_Text --
    ----------------
