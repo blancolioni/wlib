@@ -1,7 +1,5 @@
 package WL.Noise is
 
-   subtype Float is Float;
-
    subtype Signed_Unit_Real is Float range -1.0 .. 1.0;
    subtype Unit_Real is Float range 0.0 .. 1.0;
 

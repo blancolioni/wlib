@@ -213,7 +213,7 @@ package body WL.Noise is
 
          for Dimension in Noise.Buffer (Index)'Range loop
             Noise.Buffer (Index) (Dimension) :=
-              Float (Random (Gen) - 0.5);
+              Random (Gen) - 0.5;
          end loop;
 
          Normalise (Noise.Buffer (Index).all);
