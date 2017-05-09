@@ -7,6 +7,8 @@ generic
    with function "=" (Left, Right : Element_Type) return Boolean is <>;
 package WL.String_Maps is
 
+   pragma Preelaborate;
+
    package Maps is
      new Ada.Containers.Indefinite_Hashed_Maps
        (Key_Type        => String,
