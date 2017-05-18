@@ -75,7 +75,7 @@ package body WL.Shape_Files is
             Buffer : Storage_Array (0 .. 11);
             for Buffer'Address use Header'Address;
          begin
-            WL.Binary_IO.Read (File.File, Buffer);
+            WL.Binary_IO.Read (File.File, Header'Size, Header'Address);
             Change_Endian (Buffer (0 .. 3));
             Change_Endian (Buffer (4 .. 7));
             if Debug_Shapes then
@@ -179,8 +179,8 @@ package body WL.Shape_Files is
            (File => File.File,
             Mode => WL.Binary_IO.In_File,
             Name => Name);
-         WL.Binary_IO.Read
-           (File.File, Buffer);
+         WL.Binary_IO.Read (File.File, File_Header'Size,
+                            File.Header.all'Address);
          Change_Endian (Buffer (0 .. 3));
          Change_Endian (Buffer (24 .. 27));
 
