@@ -206,7 +206,7 @@ package body WL.Binary_IO is
         (Stream, Ada.Streams.Stream_IO.In_File, Name);
 
       Ada.Streams.Stream_IO.Read (Stream, File.Data.all, Last);
-      pragma Assert (Last = Length);
+      pragma Assert (Last = Length or else Last = Length - 1);
 
       Ada.Streams.Stream_IO.Close (Stream);
 
