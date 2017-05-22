@@ -3,7 +3,7 @@ with Ada.Text_IO;                       use Ada.Text_IO;
 package body WL.Processes is
 
    Progress_Characters : constant String :=
-                           "-/|\";
+                           "-\|/";
 
    ------------
    -- Finish --
