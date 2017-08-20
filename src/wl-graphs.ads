@@ -1,3 +1,5 @@
+with Ada.Containers;
+
 private with Ada.Containers.Doubly_Linked_Lists;
 private with Ada.Containers.Vectors;
 
@@ -11,6 +13,8 @@ generic
    with function Index_Of (Vertex : Vertex_Type) return Index_Type;
    with function "=" (Left, Right : Vertex_Type) return Boolean is <>;
 package WL.Graphs is
+
+   subtype Count_Type is Ada.Containers.Count_Type;
 
    subtype Extended_Index is Index_Type'Base
      range Index_Type'First - 1 ..
@@ -37,6 +41,11 @@ package WL.Graphs is
      (Container : in out Graph;
       Vertex    : Vertex_Type)
      with Pre => not Container.Contains (Vertex);
+
+   function Edge_Count
+     (Container : Graph;
+      Vertex    : Index_Type)
+      return Count_Type;
 
    function Connected
      (Container    : Graph;
@@ -74,6 +83,13 @@ package WL.Graphs is
         procedure (To : Vertex_Type;
                    Cost : Cost_Type));
 
+   function Breadth_First_Search
+     (Container : Graph;
+      Start     : Vertex_Type;
+      Test      : not null access
+        function (Vertex : Vertex_Type) return Boolean)
+      return Vertex_Type;
+
    type Sub_Graph is private;
 
    procedure Create
@@ -100,6 +116,17 @@ package WL.Graphs is
       Start     : Index_Type;
       Max       : Cost_Type;
       Result    : out Sub_Graph);
+
+   procedure Connected_Sub_Graph
+     (Container : Graph;
+      Start     : Vertex_Type;
+      Is_Member : not null access
+        function (Vertex : Vertex_Type) return Boolean;
+      Result    : out Sub_Graph);
+
+   procedure Iterate
+     (Sub     : Sub_Graph;
+      Process : not null access procedure (Vertex : Vertex_Type));
 
    type Sub_Graph_Collection is private;
 
@@ -152,6 +179,13 @@ package WL.Graphs is
       From, To  : Index_Type;
       Test_Vertex : not null access
         function (Vertex : Vertex_Type) return Boolean)
+      return Path;
+
+   function Shortest_Path
+     (Container : Graph'Class;
+      From, To  : Index_Type;
+      Cost      : not null access
+        function (From, To : Vertex_Type) return Cost_Type)
       return Path;
 
 private
@@ -218,5 +252,11 @@ private
      (Container : Graph;
       Vertex    : Vertex_Type)
       return Extended_Index;
+
+   function Edge_Count
+     (Container : Graph;
+      Vertex    : Index_Type)
+      return Count_Type
+   is (Container.Vertices.Element (Vertex).Edges.Length);
 
 end WL.Graphs;
