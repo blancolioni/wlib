@@ -45,6 +45,44 @@ package body WL.Graphs is
    -- Breadth_First_Search --
    --------------------------
 
+   function Breadth_First_Search
+     (Container : Graph;
+      Start     : Vertex_Type;
+      Test      : not null access
+        function (Vertex : Vertex_Type) return Boolean)
+      return Vertex_Type
+   is
+      package Queue_Of_Partials is
+        new Ada.Containers.Doubly_Linked_Lists (Index_Type);
+      Queue : Queue_Of_Partials.List;
+      Tested : Queue_Of_Partials.List;
+   begin
+      Queue.Append (Index_Of (Start));
+
+      while not Queue.Is_Empty loop
+         declare
+            Ix   : constant Index_Type := Queue.First_Element;
+         begin
+            Queue.Delete_First;
+            if Test (Container.Vs (Ix)) then
+               return Container.Vs (Ix);
+            elsif not Tested.Contains (Ix) then
+               Tested.Append (Ix);
+               for Edge of Container.Vertices.Element (Ix).Edges loop
+                  Queue.Append (Edge.To);
+               end loop;
+            end if;
+         end;
+      end loop;
+
+      return Start;
+
+   end Breadth_First_Search;
+
+   --------------------------
+   -- Breadth_First_Search --
+   --------------------------
+
    procedure Breadth_First_Search
      (Container : Graph;
       Start     : Index_Type;
@@ -117,6 +155,43 @@ package body WL.Graphs is
       end loop;
       return False;
    end Connected;
+
+   -------------------------
+   -- Connected_Sub_Graph --
+   -------------------------
+
+   procedure Connected_Sub_Graph
+     (Container : Graph;
+      Start     : Vertex_Type;
+      Is_Member : not null access
+        function (Vertex : Vertex_Type) return Boolean;
+      Result    : out Sub_Graph)
+   is
+      package Queue_Of_Partials is
+        new Ada.Containers.Doubly_Linked_Lists (Index_Type);
+
+      Queue : Queue_Of_Partials.List;
+
+   begin
+      Container.Create (Result);
+      Queue.Append (Index_Of (Start));
+      while not Queue.Is_Empty loop
+         declare
+            Ix   : constant Index_Type := Queue.First_Element;
+         begin
+            Queue.Delete_First;
+            if Is_Member (Container.Vs (Ix))
+              and then not Contains (Result, Ix)
+            then
+               Append (Result, Ix);
+               for Edge of Container.Vertices.Element (Ix).Edges loop
+                  Queue.Append (Edge.To);
+               end loop;
+            end if;
+         end;
+      end loop;
+
+   end Connected_Sub_Graph;
 
    --------------
    -- Contains --
@@ -329,6 +404,20 @@ package body WL.Graphs is
       Container.Vertices.Iterate (Local_Process'Access);
    end Iterate;
 
+   -------------
+   -- Iterate --
+   -------------
+
+   procedure Iterate
+     (Sub     : Sub_Graph;
+      Process : not null access procedure (Vertex : Vertex_Type))
+   is
+   begin
+      for Index of Sub.Vertex_List loop
+         Process (Sub.Main_Graph.Vs (Index));
+      end loop;
+   end Iterate;
+
    -------------------
    -- Iterate_Edges --
    -------------------
@@ -427,10 +516,10 @@ package body WL.Graphs is
       From, To  : Index_Type)
       return Path
    is
-      function OK (Vertex : Vertex_Type) return Boolean
-      is (True);
+      function Cost (From, To : Vertex_Type) return Cost_Type
+      is (Container.Edge_Cost (Index_Of (From), Index_Of (To)));
    begin
-      return Container.Shortest_Path (From, To, OK'Access);
+      return Container.Shortest_Path (From, To, Cost'Access);
    end Shortest_Path;
 
    -------------------
@@ -442,6 +531,26 @@ package body WL.Graphs is
       From, To  : Index_Type;
       Test_Vertex : not null access
         function (Vertex : Vertex_Type) return Boolean)
+      return Path
+   is
+
+      function Cost (From, To : Vertex_Type) return Cost_Type
+      is (if Test_Vertex (To)
+          then Container.Edge_Cost (Index_Of (From), Index_Of (To))
+          else Cost_Type'Last);
+   begin
+      return Container.Shortest_Path (From, To, Cost'Access);
+   end Shortest_Path;
+
+   -------------------
+   -- Shortest_Path --
+   -------------------
+
+   function Shortest_Path
+     (Container : Graph'Class;
+      From, To  : Index_Type;
+      Cost      : not null access
+        function (From, To : Vertex_Type) return Cost_Type)
       return Path
    is
       type Partial_Path is
@@ -474,11 +583,11 @@ package body WL.Graphs is
                declare
                   V      : Partial_Path := P;
                begin
+                  Result.Cost := Result.Cost + V.Cost;
                   while V.Previous > 0 loop
                      Result.Edges.Insert
                        (Result.Edges.First,
                         (V.Current, V.Cost));
-                     Result.Cost := Result.Cost + V.Cost;
                      V := Vector.Element (V.Previous);
                   end loop;
 
@@ -491,14 +600,30 @@ package body WL.Graphs is
                Vector.Append (P);
                for Edge of Container.Vertices.Element (P.Current).Edges loop
                   if Edge.To = To
-                    or else Test_Vertex (Container.Vs (Edge.To))
+                    or else Cost (Container.Vs.Element (P.Current),
+                                  Container.Vs (Edge.To)) < Cost_Type'Last
                   then
                      declare
+                        use Queue_Of_Partials;
+                        This_Cost : constant Cost_Type :=
+                                      Cost (Container.Vs.Element (P.Current),
+                                            Container.Vs (Edge.To))
+                                      + Vector.Last_Element.Cost;
                         New_Partial : constant Partial_Path :=
                                         (Edge.To, Vector.Last_Index,
-                                         Edge.Cost);
+                                         This_Cost);
+                        Position    : Queue_Of_Partials.Cursor := Queue.First;
                      begin
-                        Queue.Append (New_Partial);
+                        while Has_Element (Position)
+                          and then Element (Position).Cost < This_Cost
+                        loop
+                           Next (Position);
+                        end loop;
+                        if Has_Element (Position) then
+                           Queue.Insert (Position, New_Partial);
+                        else
+                           Queue.Append (New_Partial);
+                        end if;
                      end;
                   end if;
                end loop;
