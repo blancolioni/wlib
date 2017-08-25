@@ -1,3 +1,5 @@
+with Ada.Exceptions;
+
 package body WL.Images is
 
    ------------
@@ -33,6 +35,11 @@ package body WL.Images is
       WL.Binary_IO.Open (File, WL.Binary_IO.In_File, Path);
       Reader.Read (File, Image);
       WL.Binary_IO.Close (File);
+   exception
+      when E : others =>
+         raise Constraint_Error with
+           "Unable to read from '"
+           & Path & "': " & Ada.Exceptions.Exception_Message (E);
    end Read;
 
    ---------------
