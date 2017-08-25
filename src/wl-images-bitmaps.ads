@@ -1,8 +1,19 @@
 package WL.Images.Bitmaps is
 
-   procedure Write_Bitmap (Image : Image_Type'Class;
-                           Path  : String;
-                           Level : Image_Level_Index :=
-                             Default_Image_Level);
+   type Bitmap_Image_Reader is
+     new Image_Reader with private;
+
+   overriding procedure Read
+     (Reader : Bitmap_Image_Reader;
+      File   : WL.Binary_IO.File_Type;
+      Image  : out Image_Type'Class);
+
+private
+
+   type Bitmap_Image_Reader is
+     new Image_Reader with
+      record
+         Flip_Vertical : Boolean := True;
+      end record;
 
 end WL.Images.Bitmaps;
