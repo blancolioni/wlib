@@ -1,80 +1,67 @@
 package body WL.Images is
 
    ------------
-   -- Colour --
+   -- Create --
    ------------
 
-   function Colour
-     (Image : Image_Type;
-      Level : Image_Level_Index;
-      X, Y  : Natural)
-      return Colour_Type
+   procedure Create
+     (Image  : in out Image_Type'Class;
+      Width  : Pixel_X_Count;
+      Height : Pixel_Y_Count;
+      Layers : Layer_Count := 1)
+   is
+      Layer_Data : Image_Data (1 .. Width, 1 .. Height);
+      Layer      : Image_Layer_Record := (Width, Height, others => <>);
+   begin
+      Layer.Data.Replace_Element (Layer_Data);
+      for I in 1 .. Layers loop
+         Image.Layers.Append (Layer);
+      end loop;
+   end Create;
+
+   ----------
+   -- Read --
+   ----------
+
+   procedure Read
+     (Reader : Image_Reader'Class;
+      Path   : String;
+      Image  : out Image_Type'Class)
+   is
+      File : WL.Binary_IO.File_Type;
+   begin
+      WL.Binary_IO.Open (File, WL.Binary_IO.In_File, Path);
+      Reader.Read (File, Image);
+      WL.Binary_IO.Close (File);
+   end Read;
+
+   ---------------
+   -- Set_Color --
+   ---------------
+
+   procedure Set_Color
+     (Image : in out Image_Type'Class;
+      X     : Pixel_X_Range;
+      Y     : Pixel_Y_Range;
+      Color : Image_Color)
    is
    begin
-      return Image.Levels (Level).Data (X, Y);
-   end Colour;
+      Image.Set_Color (1, X, Y, Color);
+   end Set_Color;
 
-   ------------
-   -- Colour --
-   ------------
+   ---------------
+   -- Set_Color --
+   ---------------
 
-   function Colour (Image : Image_Type;
-                    X, Y  : Natural)
-                    return Colour_Type
+   procedure Set_Color
+     (Image : in out Image_Type'Class;
+      Layer : Layer_Index;
+      X     : Pixel_X_Range;
+      Y     : Pixel_Y_Range;
+      Color : Image_Color)
    is
    begin
-      return Colour (Image, Default_Image_Level, X, Y);
-   end Colour;
-
-   ------------
-   -- Height --
-   ------------
-
-   function Height (Image : Image_Type;
-                    Level : Image_Level_Index)
-                    return Natural
-   is
-   begin
-      return Image.Levels (Level).Height;
-   end Height;
-
-   ------------
-   -- Height --
-   ------------
-
-   function Height (Image : Image_Type) return Natural is
-   begin
-      return Height (Image, Default_Image_Level);
-   end Height;
-
-   -----------------
-   -- Level_Count --
-   -----------------
-
-   function Level_Count (Image : Image_Type) return Image_Level_Count is
-   begin
-      return Image.Num_Levels;
-   end Level_Count;
-
-   -----------
-   -- Width --
-   -----------
-
-   function Width (Image : Image_Type;
-                    Level : Image_Level_Index)
-                   return Natural
-   is
-   begin
-      return Image.Levels (Level).Width;
-   end Width;
-
-   -----------
-   -- Width --
-   -----------
-
-   function Width (Image : Image_Type) return Natural is
-   begin
-      return Width (Image, Default_Image_Level);
-   end Width;
+      Image.Layers (Layer).Data.Reference.Element (X, Y) := Color;
+   end Set_Color;
 
 end WL.Images;

@@ -1,65 +1,161 @@
+private with Ada.Containers.Indefinite_Holders;
+private with Ada.Containers.Vectors;
+
+with WL.Binary_IO;
+
 package WL.Images is
 
-   type Colour_Element is mod 256;
+   type Color_Element is mod 256;
 
-   type Colour_Type is
+   type Image_Color is
       record
-         Red   : Colour_Element;
-         Green : Colour_Element;
-         Blue  : Colour_Element;
-         Alpha : Colour_Element;
+         Red   : Color_Element := 0;
+         Green : Color_Element := 0;
+         Blue  : Color_Element := 0;
+         Alpha : Color_Element := 0;
       end record;
 
-   for Colour_Type'Size use 32;
+   for Image_Color'Size use 32;
 
-   type Image_Level_Count is range 0 .. 16;
-   subtype Image_Level_Index is
-     Image_Level_Count range 1 .. Image_Level_Count'Last;
-   Default_Image_Level : constant Image_Level_Index := 1;
+   type Layer_Count is new Natural;
+   subtype Layer_Index is Layer_Count range 1 .. Layer_Count'Last;
+
+   type Pixel_X_Count is new Natural;
+   subtype Pixel_X_Range is Pixel_X_Count range 1 .. Pixel_X_Count'Last;
+
+   type Pixel_Y_Count is new Natural;
+   subtype Pixel_Y_Range is Pixel_Y_Count range 1 .. Pixel_Y_Count'Last;
 
    type Image_Type is tagged private;
 
-   function Colour (Image : Image_Type;
-                    X, Y  : Natural)
-                    return Colour_Type;
+   function Number_Of_Layers
+     (Image : Image_Type'Class)
+      return Layer_Count;
 
-   function Width (Image : Image_Type) return Natural;
-   function Height (Image : Image_Type) return Natural;
+   function Width
+     (Image : Image_Type'Class;
+      Layer : Layer_Index := Layer_Index'First)
+      return Pixel_X_Count
+     with Pre => Layer <= Image.Number_Of_Layers;
 
-   function Level_Count (Image : Image_Type) return Image_Level_Count;
+   function Height
+     (Image : Image_Type'Class;
+      Layer : Layer_Index := Layer_Index'First)
+      return Pixel_Y_Count
+     with Pre => Layer <= Image.Number_Of_Layers;
 
-   function Colour (Image : Image_Type;
-                    Level : Image_Level_Index;
-                    X, Y  : Natural)
-                    return Colour_Type;
+   function Color
+     (Image : Image_Type'Class;
+      X     : Pixel_X_Range;
+      Y     : Pixel_Y_Range)
+      return Image_Color
+     with Pre => X <= Image.Width and then Y <= Image.Height;
 
-   function Width (Image : Image_Type;
-                   Level : Image_Level_Index)
-                   return Natural;
+   function Color
+     (Image : Image_Type'Class;
+      Layer : Layer_Index;
+      X     : Pixel_X_Range;
+      Y     : Pixel_Y_Range)
+      return Image_Color
+     with Pre => Layer <= Image.Number_Of_Layers
+     and then X <= Image.Width (Layer)
+     and then Y <= Image.Height (Layer);
 
-   function Height (Image : Image_Type;
-                    Level : Image_Level_Index)
-                    return Natural;
+   procedure Create
+     (Image  : in out Image_Type'Class;
+      Width  : Pixel_X_Count;
+      Height : Pixel_Y_Count;
+      Layers : Layer_Count := 1);
+
+   procedure Set_Color
+     (Image : in out Image_Type'Class;
+      X     : Pixel_X_Range;
+      Y     : Pixel_Y_Range;
+      Color : Image_Color)
+     with Pre => X in 1 .. Image.Width
+     and then Y in 1 .. Image.Height
+     and then Image.Number_Of_Layers = 1;
+
+   procedure Set_Color
+     (Image : in out Image_Type'Class;
+      Layer : Layer_Index;
+      X     : Pixel_X_Range;
+      Y     : Pixel_Y_Range;
+      Color : Image_Color)
+     with Pre => X in 1 .. Image.Width (Layer)
+     and then Y in 1 .. Image.Height (Layer)
+     and then Layer in 1 .. Image.Number_Of_Layers;
+
+   type Image_Reader is interface;
+
+   procedure Read
+     (Reader : Image_Reader;
+      File   : WL.Binary_IO.File_Type;
+      Image  : out Image_Type'Class)
+   is abstract;
+
+   procedure Read
+     (Reader : Image_Reader'Class;
+      Path   : String;
+      Image  : out Image_Type'Class);
 
 private
 
    type Image_Data is
-     array (Natural range <>, Natural range <>) of Colour_Type;
-   type Image_Data_Access is access Image_Data;
+     array (Pixel_X_Range range <>, Pixel_Y_Range range <>) of Image_Color;
 
-   type Image_Level_Info is
+   package Image_Data_Holders is
+     new Ada.Containers.Indefinite_Holders (Image_Data);
+
+   type Image_Layer_Record is
       record
-         Width, Height : Natural;
-         Data          : Image_Data_Access;
+         Width  : Pixel_X_Count;
+         Height : Pixel_Y_Count;
+         Data   : Image_Data_Holders.Holder;
       end record;
 
-   type Image_Level_Array is
-     array (Image_Level_Index) of Image_Level_Info;
+   package Image_Layer_Vectors is
+     new Ada.Containers.Vectors (Layer_Index, Image_Layer_Record);
 
    type Image_Type is tagged
       record
-         Num_Levels : Image_Level_Count;
-         Levels     : Image_Level_Array;
-      end record;
+         Layers : Image_Layer_Vectors.Vector;
+      end record
+     with Invariant =>
+       (for all Layer of Image_Type.Layers =>
+          Layer.Width = Layer.Data.Element'Length (1)
+        and then Layer.Height = Layer.Data.Element'Length (2));
+
+   function Number_Of_Layers
+     (Image : Image_Type'Class)
+      return Layer_Count
+   is (Image.Layers.Last_Index);
+
+   function Width
+     (Image : Image_Type'Class;
+      Layer : Layer_Index := Layer_Index'First)
+      return Pixel_X_Count
+   is (Image.Layers (Layer).Width);
+
+   function Height
+     (Image : Image_Type'Class;
+      Layer : Layer_Index := Layer_Index'First)
+      return Pixel_Y_Count
+   is (Image.Layers (Layer).Height);
+
+   function Color
+     (Image : Image_Type'Class;
+      X     : Pixel_X_Range;
+      Y     : Pixel_Y_Range)
+      return Image_Color
+   is (Image.Color (1, X, Y));
+
+   function Color
+     (Image : Image_Type'Class;
+      Layer : Layer_Index;
+      X     : Pixel_X_Range;
+      Y     : Pixel_Y_Range)
+      return Image_Color
+   is (Image.Layers (Layer).Data.Element (X, Y));
 
 end WL.Images;
