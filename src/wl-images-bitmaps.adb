@@ -38,7 +38,7 @@ package body WL.Images.Bitmaps is
 
    overriding procedure Read
      (Reader : Bitmap_Image_Reader;
-      File   : WL.Binary_IO.File_Type;
+      File   : in out WL.Binary_IO.File_Type;
       Image  : out Image_Type'Class)
    is
       Magic          : Bitmap_Magic;

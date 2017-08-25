@@ -72,8 +72,8 @@ package WL.Images is
       X     : Pixel_X_Range;
       Y     : Pixel_Y_Range;
       Color : Image_Color)
-     with Pre => X in 1 .. Image.Width
-     and then Y in 1 .. Image.Height
+     with Pre => X <= Image.Width
+     and then Y <= Image.Height
      and then Image.Number_Of_Layers = 1;
 
    procedure Set_Color
@@ -82,15 +82,15 @@ package WL.Images is
       X     : Pixel_X_Range;
       Y     : Pixel_Y_Range;
       Color : Image_Color)
-     with Pre => X in 1 .. Image.Width (Layer)
-     and then Y in 1 .. Image.Height (Layer)
-     and then Layer in 1 .. Image.Number_Of_Layers;
+     with Pre => X <= Image.Width (Layer)
+     and then Y <= Image.Height (Layer)
+     and then Layer <= Image.Number_Of_Layers;
 
    type Image_Reader is interface;
 
    procedure Read
      (Reader : Image_Reader;
-      File   : WL.Binary_IO.File_Type;
+      File   : in out WL.Binary_IO.File_Type;
       Image  : out Image_Type'Class)
    is abstract;
 
