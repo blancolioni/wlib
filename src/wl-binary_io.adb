@@ -395,6 +395,18 @@ package body WL.Binary_IO is
    end Set_Offset;
 
    ----------
+   -- Skip --
+   ----------
+
+   procedure Skip
+     (File   : in out File_Type;
+      Offset : Word_32)
+   is
+   begin
+      File.Offset := File.Offset + Offset;
+   end Skip;
+
+   ----------
    -- View --
    ----------
 

@@ -104,6 +104,10 @@ package WL.Binary_IO is
    procedure Set_Offset (File : in out File_Type;
                          Offset : in Word_32);
 
+   procedure Skip
+     (File : in out File_Type;
+      Offset : Word_32);
+
    function Hex_Image (Value : Word_32) return String;
    function Hex_Image (Value : Word_16) return String;
    function Hex_Image (Value : Word_8) return String;
