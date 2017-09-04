@@ -115,7 +115,7 @@ package body WL.Command_Line is
                     or else Value = "1"
                   then
                      Cached_Values.Insert
-                       (Long_Name, Value);
+                       (Long_Name, "true");
                   else
                      Cached_Values.Insert (Long_Name, "");
                   end if;
