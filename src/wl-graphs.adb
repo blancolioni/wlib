@@ -635,6 +635,122 @@ package body WL.Graphs is
 
    end Shortest_Path;
 
+   -------------------
+   -- Shortest_Path --
+   -------------------
+
+   function Shortest_Path
+     (Container : Graph'Class;
+      From, To  : Index_Type;
+      Cost      : not null access
+        function (From, To : Vertex_Type) return Cost_Type;
+      Estimate  : not null access
+        function (From, To : Vertex_Type) return Cost_Type)
+      return Path
+   is
+      type Partial_Path is
+         record
+            Current   : Index_Type;
+            Previous  : Natural;
+            Cost      : Cost_Type;
+            Remaining : Cost_Type;
+         end record;
+
+      package Queue_Of_Partials is
+        new Ada.Containers.Doubly_Linked_Lists (Partial_Path);
+
+      package Vector_Of_Partials is
+        new Ada.Containers.Vectors (Positive, Partial_Path);
+
+      Queue  : Queue_Of_Partials.List;
+      Vector : Vector_Of_Partials.Vector;
+      Tried  : Sub_Graph;
+      Result : Path := (From, 0.0, Edge_Lists.Empty_List);
+      Dest_Vertex : constant Vertex_Type := Container.Vs.Element (To);
+      Min_Cost    : constant Cost_Type :=
+                      Estimate (Container.Vs.Element (From), Dest_Vertex);
+   begin
+
+      Container.Create (Tried);
+      Queue.Append ((From, 0, 0.0, Min_Cost));
+
+      while not Queue.Is_Empty loop
+         declare
+            P    : constant Partial_Path := Queue.First_Element;
+         begin
+--              Ada.Text_IO.Put_Line
+--                ("queued:" & Natural'Image (Natural (Queue.Length))
+--                 & "; first:" & Natural'Image (Natural (P.Cost))
+--                 & " +" & Natural'Image (Natural (P.Remaining))
+--                 & " =" & Natural'Image (Natural (P.Cost + P.Remaining)));
+
+            Queue.Delete_First;
+            if P.Current = To then
+               declare
+                  V      : Partial_Path := P;
+               begin
+                  Result.Cost := Result.Cost + V.Cost;
+                  while V.Previous > 0 loop
+                     Result.Edges.Insert
+                       (Result.Edges.First,
+                        (V.Current, V.Cost));
+                     V := Vector.Element (V.Previous);
+                  end loop;
+
+                  Result.Start := V.Current;
+                  exit;
+               end;
+            end if;
+            if not Contains (Tried, P.Current) then
+               Append (Tried, P.Current);
+               Vector.Append (P);
+               for Edge of Container.Vertices.Element (P.Current).Edges loop
+                  if Edge.To = To
+                    or else Cost (Container.Vs.Element (P.Current),
+                                  Container.Vs (Edge.To)) < Cost_Type'Last
+                  then
+                     declare
+                        use Queue_Of_Partials;
+                        This_Cost   : constant Cost_Type :=
+                                        Cost (Container.Vs.Element (P.Current),
+                                              Container.Vs (Edge.To))
+                                        + Vector.Last_Element.Cost;
+                        Rest_Cost   : constant Cost_Type :=
+                                        Estimate
+                                          (Container.Vs (Edge.To),
+                                           Container.Vs (To));
+                        New_Partial : constant Partial_Path :=
+                                        (Edge.To, Vector.Last_Index,
+                                         This_Cost, Rest_Cost);
+                        Est_Total   : constant Cost_Type :=
+                                        This_Cost + Rest_Cost;
+                        Position    : Queue_Of_Partials.Cursor := Queue.First;
+                     begin
+                        while Has_Element (Position) loop
+                           declare
+                              Item : Partial_Path renames Element (Position);
+                           begin
+                              exit when Item.Cost + Item.Remaining
+                                >= Est_Total;
+                           end;
+                           Next (Position);
+                        end loop;
+                        if Has_Element (Position) then
+                           Queue.Insert (Position, New_Partial);
+                        else
+                           Queue.Append (New_Partial);
+                        end if;
+                     end;
+                  end if;
+               end loop;
+            end if;
+         end;
+      end loop;
+
+      return Result;
+
+   end Shortest_Path;
+
    ---------------------
    -- Sub_Graph_Count --
    ---------------------

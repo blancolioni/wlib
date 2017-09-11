@@ -188,6 +188,15 @@ package WL.Graphs is
         function (From, To : Vertex_Type) return Cost_Type)
       return Path;
 
+   function Shortest_Path
+     (Container : Graph'Class;
+      From, To  : Index_Type;
+      Cost      : not null access
+        function (From, To : Vertex_Type) return Cost_Type;
+      Estimate  : not null access
+        function (From, To : Vertex_Type) return Cost_Type)
+      return Path;
+
 private
 
    type Edge_Type is
