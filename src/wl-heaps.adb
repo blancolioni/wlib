@@ -1,5 +1,8 @@
 package body WL.Heaps is
 
+   procedure Heapify
+     (Container : in out Heap'Class);
+
    procedure Sift_Down
      (Container : in out Heap'Class;
       Start     : Positive);
@@ -46,6 +49,21 @@ package body WL.Heaps is
       Container.Vector.Delete_Last;
       Container.Sift_Down (1);
    end Delete_Maximum;
+
+   -------------
+   -- Heapify --
+   -------------
+
+   procedure Heapify
+     (Container : in out Heap'Class)
+   is
+      Start : Natural := Parent (Container.Vector.Last_Index);
+   begin
+      while Start > 0 loop
+         Container.Sift_Down (Start);
+         Start := Start - 1;
+      end loop;
+   end Heapify;
 
    ------------
    -- Insert --
@@ -108,7 +126,7 @@ package body WL.Heaps is
       pragma Assert (Found);
       Container.Vector.Replace_Element (Container.Vector.Last_Index,
                                         (Key, Element));
-      Container.Sift_Up (1, Container.Vector.Last_Index);
+      Container.Heapify;
    end Replace;
 
    ---------------
