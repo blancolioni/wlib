@@ -27,6 +27,10 @@ package WL.Heaps is
      (Container : Heap)
       return Element_Type;
 
+   function Maximum_Key
+     (Container : Heap)
+      return Key_Type;
+
    procedure Delete_Maximum
      (Container : in out Heap);
 
@@ -45,5 +49,15 @@ private
       record
          Vector : Heap_Vectors.Vector;
       end record;
+
+   function Maximum_Element
+     (Container : Heap)
+      return Element_Type
+   is (Container.Vector.First_Element.Element);
+
+   function Maximum_Key
+     (Container : Heap)
+      return Key_Type
+   is (Container.Vector.First_Element.Key);
 
 end WL.Heaps;

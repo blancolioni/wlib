@@ -91,18 +91,6 @@ package body WL.Heaps is
       return Container.Vector.Is_Empty;
    end Is_Empty;
 
-   ---------------------
-   -- Maximum_Element --
-   ---------------------
-
-   function Maximum_Element
-     (Container : Heap)
-      return Element_Type
-   is
-   begin
-      return Container.Vector.First_Element.Element;
-   end Maximum_Element;
-
    -------------
    -- Replace --
    -------------
