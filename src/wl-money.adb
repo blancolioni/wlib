@@ -44,7 +44,7 @@ package body WL.Money is
                     return Money_Type
    is
    begin
-      return Money * Money_Type (Factor);
+      return To_Money (To_Float (Money) * Factor);
    end Adjust;
 
    ------------------
