@@ -167,7 +167,10 @@ package WL.Graphs is
 
    type Array_Of_Vertices is array (Positive range <>) of Index_Type;
 
-   function Get_Path (P : Path) return Array_Of_Vertices;
+   function Path_Vertices
+     (Container : Graph;
+      P         : Path)
+      return Array_Of_Vertices;
 
    function Shortest_Path
      (Container : Graph'Class;
@@ -196,6 +199,23 @@ package WL.Graphs is
       Estimate  : not null access
         function (From, To : Vertex_Type) return Cost_Type)
       return Path;
+
+   function Shortest_Path
+     (Container      : Graph'Class;
+      Start, Finish  : Index_Type;
+      Passable       : not null access
+        function (From, To : Vertex_Type) return Boolean;
+      Cost           : not null access
+        function (From, To : Vertex_Type) return Cost_Type;
+      Estimate       : not null access
+        function (From, To : Vertex_Type) return Cost_Type)
+      return Path;
+
+   procedure Breadth_First_Scan
+     (Container : Graph;
+      Start     : Index_Type;
+      Process   : not null access
+        procedure (Path_To : Path));
 
 private
 
@@ -252,9 +272,8 @@ private
 
    type Path is
       record
-         Start : Index_Type;
-         Cost  : Cost_Type;
-         Edges : Edge_Lists.List;
+         Cost : Cost_Type := 0.0;
+         List : Index_Lists.List;
       end record;
 
    function Index_Of
