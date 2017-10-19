@@ -125,14 +125,24 @@ package body WL.Money is
         Ada.Strings.Fixed.Trim (Price_Type'Image ((Item + 5) / 10),
                                 Ada.Strings.Left);
       Currency : constant String := Currency_Symbol;
+
+      function Group (S : String) return String
+      is (if S'Length <= 3
+          then S
+          else Group (S (S'First .. S'Last - 3))
+          & Digit_Grouping_Symbol
+          & S (S'Last - 2 .. S'Last));
+
    begin
       if Image'Length = 1 then
-         return Currency & "0.0" & Image;
+         return Currency & "0" & Decimal_Symbol & "0" & Image;
       elsif Image'Length = 2 then
-         return Currency & "0." & Image;
+         return Currency & "0" & Decimal_Symbol & "." & Image;
       else
-         return Currency & Image (Image'First .. Image'Last - 2) & "." &
-           Image (Image'Last - 1 .. Image'Last);
+         return Currency
+           & Group (Image (Image'First .. Image'Last - 2))
+           & Decimal_Symbol
+           & Image (Image'Last - 1 .. Image'Last);
       end if;
    end Image;
 
