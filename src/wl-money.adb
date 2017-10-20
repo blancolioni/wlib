@@ -100,7 +100,7 @@ package body WL.Money is
    is
    begin
       return Quantities.To_Quantity
-        (Float (Total_Cash) / Float (Price));
+        (Float (Total_Cash / Money_Type (Price)));
    end Get_Quantity;
 
    -----------
