@@ -137,7 +137,7 @@ package body WL.Money is
       if Image'Length = 1 then
          return Currency & "0" & Decimal_Symbol & "0" & Image;
       elsif Image'Length = 2 then
-         return Currency & "0" & Decimal_Symbol & "." & Image;
+         return Currency & "0" & Decimal_Symbol & Image;
       else
          return Currency
            & Group (Image (Image'First .. Image'Last - 2))
