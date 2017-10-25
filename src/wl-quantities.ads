@@ -14,6 +14,8 @@ package WL.Quantities is
    function Image (Item : Quantity_Type) return String;
    function Value (Image : String) return Quantity_Type;
 
+   function Show (Item : Quantity_Type) return String;
+
    function "*" (Left, Right : Quantity_Type) return Quantity_Type;
    function "/" (Left, Right : Quantity_Type) return Quantity_Type;
    function "+" (Left, Right : Quantity_Type) return Quantity_Type;
@@ -54,7 +56,7 @@ package WL.Quantities is
 
 private
 
-   type Quantity_Type is range -2 ** 63 .. 2 ** 63 - 1;
+   type Quantity_Type is range 0 .. 2 ** 63 - 1;
 
    pragma Import (Intrinsic, "*");
    pragma Import (Intrinsic, "/");
