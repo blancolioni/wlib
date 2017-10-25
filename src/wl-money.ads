@@ -85,6 +85,11 @@ package WL.Money is
 
    function Image (Item : Money_Type) return String;
    function Image (Item : Price_Type) return String;
+   --  Raw image functions
+
+   function Show (Item : Money_Type) return String;
+   function Show (Item : Price_Type) return String;
+   --  User-friendly image functions
 
    function Value (Image : String) return Money_Type;
    function Value (Image : String) return Price_Type;

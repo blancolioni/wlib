@@ -43,21 +43,9 @@ package body WL.Quantities is
    -----------
 
    function Image (Item : Quantity_Type) return String is
-
-      Factors    : constant array (1 .. 3) of Float :=
-        (1.0E9, 1.0E6, 1.0E3);
-      Extensions : constant String := "GMK";
    begin
-      for I in Factors'Range loop
-         if Float (Item) > Factors (I) then
-            return Significant_Digits_Image (Float (Item) / Factors (I), 3) &
-              (1 => Extensions (I));
-         end if;
-      end loop;
-
       return Ada.Strings.Fixed.Trim
         (Quantity_Type'Image (Item), Ada.Strings.Left);
-
    end Image;
 
    ---------
@@ -115,6 +103,28 @@ package body WL.Quantities is
    begin
       Local_Random_Unit_Float := Fn;
    end Set_Random_Unit_Float;
+
+   ----------
+   -- Show --
+   ----------
+
+   function Show (Item : Quantity_Type) return String is
+
+      Factors    : constant array (1 .. 3) of Float :=
+                     (1.0E9, 1.0E6, 1.0E3);
+      Extensions : constant String := "GMK";
+   begin
+      for I in Factors'Range loop
+         if Float (Item) > Factors (I) then
+            return Significant_Digits_Image (Float (Item) / Factors (I), 3) &
+            (1 => Extensions (I));
+         end if;
+      end loop;
+
+      return Ada.Strings.Fixed.Trim
+        (Quantity_Type'Image (Item), Ada.Strings.Left);
+
+   end Show;
 
    ------------------------------
    -- Significant_Digits_Image --

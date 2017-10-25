@@ -110,7 +110,7 @@ package body WL.Money is
    function Image (Item : Money_Type) return String is
    begin
       if Item < 0 then
-         return "(" & Image (Price_Type (abs Item)) & ")";
+         return "-" & Image (Price_Type (-Item));
       else
          return Image (Price_Type (Item));
       end if;
@@ -121,29 +121,19 @@ package body WL.Money is
    -----------
 
    function Image (Item : Price_Type) return String is
-      Image : constant String :=
-        Ada.Strings.Fixed.Trim (Price_Type'Image ((Item + 5) / 10),
-                                Ada.Strings.Left);
-      Currency : constant String := Currency_Symbol;
-
-      function Group (S : String) return String
-      is (if S'Length <= 3
-          then S
-          else Group (S (S'First .. S'Last - 3))
-          & Digit_Grouping_Symbol
-          & S (S'Last - 2 .. S'Last));
-
+      Base_Image : constant String :=
+                     Ada.Strings.Fixed.Trim
+                       (Price_Type'Image (Item / 1000),
+                        Ada.Strings.Left);
+      Decimal_Image : constant String :=
+                        Ada.Strings.Fixed.Trim
+                          (Price_Type'Image (Item mod 1000),
+                           Ada.Strings.Left);
    begin
-      if Image'Length = 1 then
-         return Currency & "0" & Decimal_Symbol & "0" & Image;
-      elsif Image'Length = 2 then
-         return Currency & "0" & Decimal_Symbol & Image;
-      else
-         return Currency
-           & Group (Image (Image'First .. Image'Last - 2))
-           & Decimal_Symbol
-           & Image (Image'Last - 1 .. Image'Last);
-      end if;
+      return Result : String := Base_Image & ".000" do
+         Result (Result'Last - Decimal_Image'Length + 1 .. Result'Last) :=
+           Decimal_Image;
+      end return;
    end Image;
 
    ---------
@@ -217,6 +207,49 @@ package body WL.Money is
       Local_Decimal_Symbol (1 .. Decimal_Symbol'Length) :=
         Decimal_Symbol;
    end Set_Image_Properties;
+
+   ----------
+   -- Show --
+   ----------
+
+   function Show (Item : Money_Type) return String is
+   begin
+      if Item < 0 then
+         return "(" & Show (Price_Type (abs Item)) & ")";
+      else
+         return Show (Price_Type (Item));
+      end if;
+   end Show;
+
+   ----------
+   -- Show --
+   ----------
+
+   function Show (Item : Price_Type) return String is
+      Image    : constant String :=
+                   Ada.Strings.Fixed.Trim (Price_Type'Image ((Item + 5) / 10),
+                                           Ada.Strings.Left);
+      Currency : constant String := Currency_Symbol;
+
+      function Group (S : String) return String
+      is (if S'Length <= 3
+          then S
+          else Group (S (S'First .. S'Last - 3))
+          & Digit_Grouping_Symbol
+          & S (S'Last - 2 .. S'Last));
+
+   begin
+      if Image'Length = 1 then
+         return Currency & "0" & Decimal_Symbol & "0" & Image;
+      elsif Image'Length = 2 then
+         return Currency & "0" & Decimal_Symbol & Image;
+      else
+         return Currency
+           & Group (Image (Image'First .. Image'Last - 2))
+           & Decimal_Symbol
+           & Image (Image'Last - 1 .. Image'Last);
+      end if;
+   end Show;
 
    -----------
    -- Split --
