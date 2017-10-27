@@ -99,6 +99,19 @@ package WL.Images is
       Path   : String;
       Image  : out Image_Type'Class);
 
+   type Image_Writer is interface;
+
+   procedure Write
+     (Writer : Image_Writer;
+      File   : in out WL.Binary_IO.File_Type;
+      Image  : Image_Type'Class)
+   is abstract;
+
+   procedure Write
+     (Writer : Image_Writer'Class;
+      Path   : String;
+      Image  : Image_Type'Class);
+
 private
 
    type Image_Data is
@@ -135,13 +148,13 @@ private
      (Image : Image_Type'Class;
       Layer : Layer_Index := Layer_Index'First)
       return Pixel_X_Count
-   is (Image.Layers (Layer).Width);
+   is (Image.Layers.Element (Layer).Width);
 
    function Height
      (Image : Image_Type'Class;
       Layer : Layer_Index := Layer_Index'First)
       return Pixel_Y_Count
-   is (Image.Layers (Layer).Height);
+   is (Image.Layers.Element (Layer).Height);
 
    function Color
      (Image : Image_Type'Class;
@@ -156,6 +169,6 @@ private
       X     : Pixel_X_Range;
       Y     : Pixel_Y_Range)
       return Image_Color
-   is (Image.Layers (Layer).Data.Element (X, Y));
+   is (Image.Layers.Element (Layer).Data.Element (X, Y));
 
 end WL.Images;
