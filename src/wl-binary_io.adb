@@ -494,4 +494,17 @@ package body WL.Binary_IO is
       end loop;
    end Write;
 
+   -----------
+   -- Write --
+   -----------
+
+   procedure Write (File : in out File_Type;
+                    Text : String)
+   is
+   begin
+      for Ch of Text loop
+         Write (File, Word_8'(Character'Pos (Ch)));
+      end loop;
+   end Write;
+
 end WL.Binary_IO;

@@ -99,6 +99,9 @@ package WL.Binary_IO is
                     Length  : in     Word_32;
                     Source  : in     System.Address);
 
+   procedure Write (File : in out File_Type;
+                    Text : String);
+
    function Current_Offset (File : File_Type) return Word_32;
 
    procedure Set_Offset (File : in out File_Type;
