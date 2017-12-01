@@ -74,6 +74,10 @@ package WL.Money is
                    Quantity_Type : Quantities.Quantity_Type)
                   return Money_Type;
 
+   function Total (Price    : Price_Type;
+                   Quantity : Float)
+                   return Money_Type;
+
    function Price (Total    : Money_Type;
                    Quantity_Type : Quantities.Quantity_Type)
                    return Price_Type;
@@ -119,6 +123,11 @@ private
 
    function To_Float (Price : Price_Type) return Float
    is (To_Float (Money_Type (Price)));
+
+   function Total (Price    : Price_Type;
+                   Quantity : Float)
+                   return Money_Type
+   is (To_Money (To_Float (Price) * Quantity));
 
    pragma Import (Intrinsic, "+");
    pragma Import (Intrinsic, "-");
