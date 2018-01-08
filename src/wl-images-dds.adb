@@ -61,17 +61,18 @@ package body WL.Images.DDS is
    procedure Copy_DXT_Block
      (Format : Internal_Format_Type;
       Block  : Word_8_Array;
-      Dest   : Image_Data_Access;
-      X, Y   : Natural);
+      Dest   : in out Image_Data;
+      X      : Pixel_X_Range;
+      Y      : Pixel_Y_Range);
 
    function From_Colour_16
      (Colour : Word_16;
       Alpha  : Boolean)
-      return Colour_Type;
+      return Image_Color;
 
-   function Interpolate (Colour_1, Colour_2 : Colour_Type;
+   function Interpolate (Colour_1, Colour_2 : Image_Color;
                          Ratio              : Float)
-                         return Colour_Type;
+                         return Image_Color;
 
    --------------------
    -- Copy_DXT_Block --
@@ -80,10 +81,11 @@ package body WL.Images.DDS is
    procedure Copy_DXT_Block
      (Format : Internal_Format_Type;
       Block  : Word_8_Array;
-      Dest   : Image_Data_Access;
-      X, Y   : Natural)
+      Dest   : in out Image_Data;
+      X      : Pixel_X_Range;
+      Y      : Pixel_Y_Range)
    is
-      Colour      : array (0 .. 3) of Colour_Type;
+      Colour      : array (0 .. 3) of Image_Color;
    begin
       case Format is
          when DXT_1 =>
@@ -100,14 +102,14 @@ package body WL.Images.DDS is
             Colour (3) :=
               Interpolate (Colour (0), Colour (1), 1.0 / 3.0);
 
-            for I in 0 .. 3 loop
-               for J in 0 .. 3 loop
+            for I in Pixel_Y_Count range 0 .. 3 loop
+               for J in Pixel_X_Count range 0 .. 3 loop
                   declare
                      Index : constant Natural :=
                                Natural
                                  ((Block (Word_32 (I) + Block'First + 4)
-                                  / (2 ** (J * 2))) mod 4);
-                     C     : constant Colour_Type := Colour (Index);
+                                  / (2 ** (Natural (J) * 2))) mod 4);
+                     C     : constant Image_Color := Colour (Index);
                   begin
                      Dest (X + J, Y + I) := C;
                   end;
@@ -120,12 +122,12 @@ package body WL.Images.DDS is
                declare
                   Alpha_Byte : constant Word_8 :=
                                  Block (Block'First + I);
-                  Alpha_1    : constant Colour_Element :=
-                                 Colour_Element (Alpha_Byte / 16);
-                  Alpha_2    : constant Colour_Element :=
-                                 Colour_Element (Alpha_Byte mod 16);
-                  DY : constant Natural := Natural (I / 2);
-                  DX : constant Natural := Natural (I mod 2);
+                  Alpha_1    : constant Color_Element :=
+                                 Color_Element (Alpha_Byte / 16);
+                  Alpha_2    : constant Color_Element :=
+                                 Color_Element (Alpha_Byte mod 16);
+                  DY : constant Pixel_Y_Range := Pixel_Y_Range (I / 2);
+                  DX : constant Pixel_X_Range := Pixel_X_Range (I mod 2);
                begin
                   Dest (X + 2 * DX, Y + DY).Alpha := Alpha_1 * 16;
                   Dest (X + 2 * DX + 1, Y + DY).Alpha := Alpha_2 * 16;
@@ -146,7 +148,7 @@ package body WL.Images.DDS is
    function From_Colour_16
      (Colour : Word_16;
       Alpha  : Boolean)
-      return Colour_Type
+      return Image_Color
    is
       R, G, B, A : Word_16;
    begin
@@ -160,30 +162,30 @@ package body WL.Images.DDS is
          R := 8 * ((Colour / 32 / 64) mod 32);
          A := 255;
       end if;
-      return (Red   => Colour_Element (R),
-              Green => Colour_Element (G),
-              Blue  => Colour_Element (B),
-              Alpha => Colour_Element (A));
+      return (Red   => Color_Element (R),
+              Green => Color_Element (G),
+              Blue  => Color_Element (B),
+              Alpha => Color_Element (A));
    end From_Colour_16;
 
    -----------------
    -- Interpolate --
    -----------------
 
-   function Interpolate (Colour_1, Colour_2 : Colour_Type;
+   function Interpolate (Colour_1, Colour_2 : Image_Color;
                          Ratio              : Float)
-                         return Colour_Type
+                         return Image_Color
    is
-      function Inter (E1, E2 : Colour_Element) return Colour_Element;
+      function Inter (E1, E2 : Color_Element) return Color_Element;
 
       -----------
       -- Inter --
       -----------
 
-      function Inter (E1, E2 : Colour_Element) return Colour_Element is
+      function Inter (E1, E2 : Color_Element) return Color_Element is
       begin
-         return Colour_Element (Float (E1) * Ratio +
-                                  Float (E2) * (1.0 - Ratio));
+         return Color_Element (Float (E1) * Ratio +
+                                 Float (E2) * (1.0 - Ratio));
       end Inter;
 
    begin
@@ -224,7 +226,7 @@ package body WL.Images.DDS is
          W, H            : Word_32;
          Internal_Format : Internal_Format_Type;
          RGB_Bits        : Word_32;
-         Level           : Image_Level_Index := 1;
+         Level           : Layer_Index := 1;
       begin
          Ada.Text_IO.Put (Ada.Directories.Simple_Name (Path) & ": ");
          if (Header.Pixel_Format.Flags and Pixel_Flag_Four_CC) /= 0 then
@@ -255,13 +257,9 @@ package body WL.Images.DDS is
          W := Header.Width;
          H := Header.Height;
 
-         Image.Num_Levels :=
-           Image_Level_Count
-             (Word_32'Max (Header.Mip_Map_Count, 1));
-
          Ada.Text_IO.Put_Line ("Mipmap levels:" & Header.Mip_Map_Count'Img);
 
-         for I in 1 .. Image.Num_Levels loop
+         for I in 1 .. Word_32'Max (Header.Mip_Map_Count, 1) loop
             case Internal_Format is
                when RGBA_8 =>
                   Num_Bytes := W * H * RGB_Bits / 8;
@@ -269,19 +267,30 @@ package body WL.Images.DDS is
                   Num_Bytes := ((W + 3) / 4) * ((H + 3) / 4) * Block_Size;
             end case;
 
-            Image.Levels (Level).Width  := Natural (W);
-            Image.Levels (Level).Height := Natural (H);
+            declare
+               Layer : Image_Layer_Record :=
+                         Image_Layer_Record'
+                           (Width  => Pixel_X_Count (W),
+                            Height => Pixel_Y_Count (H),
+                            Data   => <>);
+               Data  : constant access Image_Data :=
+                         new Image_Data (1 .. Layer.Width, 1 .. Layer.Height);
+            begin
 
-            Image.Levels (Level).Data :=
-              new Image_Data
-                (0 .. Natural (W) - 1, 0 .. Natural (H) - 1);
+--              Image.Levels (Level).Width  := Natural (W);
+--              Image.Levels (Level).Height := Natural (H);
+--
+--              Image.Levels (Level).Data :=
+--                new Image_Data
+--                  (0 .. Natural (W) - 1, 0 .. Natural (H) - 1);
 
-            case Internal_Format is
+               case Internal_Format is
                when RGBA_8 =>
-                  for Y in 0 .. H - 1 loop
-                     for X in 0 .. W - 1 loop
+                  for Y in 1 .. Layer.Height loop
+                     for X in 1 .. Layer.Width loop
                         declare
                            R, G, B, A : Word_8;
+                           Color      : Image_Color;
                         begin
                            Read (File, B);
                            Read (File, G);
@@ -291,20 +300,21 @@ package body WL.Images.DDS is
                            else
                               A := 255;
                            end if;
-                           Image.Levels (Level).Data
-                             (Natural (X), Natural (Y)) :=
-                             (Red    => Colour_Element (R),
-                              Green  => Colour_Element (G),
-                              Blue   => Colour_Element (B),
-                              Alpha  => Colour_Element (A));
+                           Color := Image_Color'
+                             (Red   => Color_Element (R),
+                              Green => Color_Element (G),
+                              Blue  => Color_Element (B),
+                              Alpha => Color_Element (A));
+                           Data (X, Y) := Color;
                         end;
                      end loop;
                   end loop;
+
                when others =>
                   declare
                      Temp         : Word_8_Array (0 .. Num_Bytes - 1);
-                     X            : Natural := 0;
-                     Y            : Natural := 0;
+                     X            : Pixel_X_Range := 1;
+                     Y            : Pixel_Y_Range := 1;
                   begin
                      Read (File, Temp'Size, Temp'Address);
                      for I in 0 .. Num_Bytes / Block_Size - 1 loop
@@ -315,17 +325,22 @@ package body WL.Images.DDS is
                            Copy_DXT_Block
                              (Internal_Format,
                               Temp (Offset .. Offset + Block_Size - 1),
-                              Image.Levels (Level).Data,
+                              Data.all,
                               X, Y);
                            X := X + 4;
-                           if X >= Image.Levels (Level).Width then
-                              X := 0;
+                           if X >= Layer.Width then
+                              X := 1;
                               Y := Y + 4;
                            end if;
                         end;
                      end loop;
                   end;
-            end case;
+               end case;
+
+               Layer.Data.Replace_Element
+                 (Data.all);
+               Image.Layers.Append (Layer);
+            end;
 
             W := Word_32'Max (W / 2, 1);
             H := Word_32'Max (H / 2, 1);
