@@ -92,6 +92,22 @@ package body WL.Heaps is
    end Is_Empty;
 
    -------------
+   -- Iterate --
+   -------------
+
+   procedure Iterate
+     (Container : Heap;
+      Process   : not null access
+        procedure (Key : Key_Type;
+                   Element : Element_Type))
+   is
+   begin
+      for Item of Container.Vector loop
+         Process (Item.Key, Item.Element);
+      end loop;
+   end Iterate;
+
+   -------------
    -- Replace --
    -------------
 
