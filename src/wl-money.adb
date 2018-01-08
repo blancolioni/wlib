@@ -307,7 +307,7 @@ package body WL.Money is
 
    function To_Money (Amount : Float) return Money_Type is
    begin
-      return Money_Type (Amount * 1000.0);
+      return Money_Type (Float'Truncation (Amount * 1000.0));
    end To_Money;
 
    -----------
