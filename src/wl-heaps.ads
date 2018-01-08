@@ -34,6 +34,12 @@ package WL.Heaps is
    procedure Delete_Maximum
      (Container : in out Heap);
 
+   procedure Iterate
+     (Container : Heap;
+      Process   : not null access
+        procedure (Key : Key_Type;
+                   Element : Element_Type));
+
 private
 
    type Heap_Element is
