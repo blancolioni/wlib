@@ -212,12 +212,16 @@ package body WL.Money is
    -- Show --
    ----------
 
-   function Show (Item : Money_Type) return String is
+   function Show
+     (Item  : Money_Type;
+      Exact : Boolean := False)
+      return String
+   is
    begin
       if Item < 0 then
-         return "(" & Show (Price_Type (abs Item)) & ")";
+         return "(" & Show (Price_Type (abs Item), Exact) & ")";
       else
-         return Show (Price_Type (Item));
+         return Show (Price_Type (Item), Exact);
       end if;
    end Show;
 
@@ -225,29 +229,58 @@ package body WL.Money is
    -- Show --
    ----------
 
-   function Show (Item : Price_Type) return String is
-      Image    : constant String :=
-                   Ada.Strings.Fixed.Trim (Price_Type'Image ((Item + 5) / 10),
-                                           Ada.Strings.Left);
-      Currency : constant String := Currency_Symbol;
+   function Show
+     (Price : Price_Type;
+      Exact : Boolean := False)
+      return String
+   is
 
-      function Group (S : String) return String
-      is (if S'Length <= 3
-          then S
-          else Group (S (S'First .. S'Last - 3))
-          & Digit_Grouping_Symbol
-          & S (S'Last - 2 .. S'Last));
+      function Show_Exact (Value : Price_Type) return String;
+
+      ----------------
+      -- Show_Exact --
+      ----------------
+
+      function Show_Exact (Value : Price_Type) return String is
+         Image    : constant String :=
+                      Ada.Strings.Fixed.Trim
+                        (Price_Type'Image ((Value + 5) / 10),
+                         Ada.Strings.Left);
+         Currency : constant String := Currency_Symbol;
+
+         function Group (S : String) return String
+         is (if S'Length <= 3
+             then S
+             else Group (S (S'First .. S'Last - 3))
+             & Digit_Grouping_Symbol
+             & S (S'Last - 2 .. S'Last));
+
+      begin
+         if Image'Length = 1 then
+            return Currency & "0" & Decimal_Symbol & "0" & Image;
+         elsif Image'Length = 2 then
+            return Currency & "0" & Decimal_Symbol & Image;
+         else
+            return Currency
+              & Group (Image (Image'First .. Image'Last - 2))
+              & Decimal_Symbol
+              & Image (Image'Last - 1 .. Image'Last);
+         end if;
+      end Show_Exact;
+
+      Float_Value : constant Float := To_Float (Price);
 
    begin
-      if Image'Length = 1 then
-         return Currency & "0" & Decimal_Symbol & "0" & Image;
-      elsif Image'Length = 2 then
-         return Currency & "0" & Decimal_Symbol & Image;
+      if Exact or else Float_Value < 10_000.0 then
+         return Show_Exact (Price);
+      elsif Float_Value < 1.0E6 then
+         return Show_Exact (Price / 1e3) & "K";
+      elsif Float_Value < 1.0E9 then
+         return Show_Exact (Price / 1e6) & "M";
+      elsif Float_Value < 1.0E12 then
+         return Show_Exact (Price / 1e9) & "B";
       else
-         return Currency
-           & Group (Image (Image'First .. Image'Last - 2))
-           & Decimal_Symbol
-           & Image (Image'Last - 1 .. Image'Last);
+         return Show_Exact (Price / 1e12) & "T";
       end if;
    end Show;
 

@@ -91,9 +91,19 @@ package WL.Money is
    function Image (Item : Price_Type) return String;
    --  Raw image functions
 
-   function Show (Item : Money_Type) return String;
-   function Show (Item : Price_Type) return String;
-   --  User-friendly image functions
+   function Show
+     (Item  : Money_Type;
+      Exact : Boolean := False)
+      return String;
+
+   function Show
+     (Price : Price_Type;
+      Exact : Boolean := False)
+      return String;
+   --  User-friendly image functions.  If Exact is True, the amount
+   --  will be shown in full (down to the cent).  Otherwise, it will
+   --  be abbreviatd to thousands, millions, billions or trillions.
+   --  e.g. $12T instead of $12,345,678,901.23
 
    function Value (Image : String) return Money_Type;
    function Value (Image : String) return Price_Type;
