@@ -18,6 +18,7 @@ package WL.Quantities is
 
    function "*" (Left, Right : Quantity_Type) return Quantity_Type;
    function "/" (Left, Right : Quantity_Type) return Quantity_Type;
+   function "mod" (Left, Right : Quantity_Type) return Quantity_Type;
    function "+" (Left, Right : Quantity_Type) return Quantity_Type;
    function "-" (Left, Right : Quantity_Type) return Quantity_Type;
    function "<" (Left, Right : Quantity_Type) return Boolean;
@@ -60,6 +61,7 @@ private
 
    pragma Import (Intrinsic, "*");
    pragma Import (Intrinsic, "/");
+   pragma Import (Intrinsic, "mod");
    pragma Import (Intrinsic, "+");
    pragma Import (Intrinsic, "-");
    pragma Import (Intrinsic, "<");
