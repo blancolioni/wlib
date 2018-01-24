@@ -193,15 +193,17 @@ package body WL.Command_Line is
                                       Trimmed_Line'Last),
                                     Left);
          begin
-            if Name = "" then
-               raise Constraint_Error with
-                 "error in " & Ada.Directories.Simple_Name (File_Path)
-                 & " line" & Natural'Image (Line_Number)
-                 & ": invalid setting";
-            end if;
+            if Trimmed_Line'Length > 0 then
+               if Name = "" then
+                  raise Constraint_Error with
+                    "error in " & Ada.Directories.Simple_Name (File_Path)
+                    & " line" & Natural'Image (Line_Number)
+                    & ": invalid setting";
+               end if;
 
-            Ada.Text_IO.Put_Line ("option: " & Name & " = " & Value);
-            Default_Values.Insert (Name, Value);
+               Ada.Text_IO.Put_Line ("option: " & Name & " = " & Value);
+               Default_Values.Insert (Name, Value);
+            end if;
          end;
       end loop;
       Close (File);
