@@ -60,6 +60,10 @@ package WL.Binary_IO is
    procedure Read (File   : in out File_Type;
                    Item   :    out String);
 
+   function Read (File       : in out File_Type;
+                  Terminator : Character := Character'Val (0))
+                  return String;
+
    procedure Read (File        : in out File_Type;
                    Size        : in     Word_32;
                    Destination : in     System.Address);
