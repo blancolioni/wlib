@@ -327,6 +327,30 @@ package body WL.Binary_IO is
    -- Read --
    ----------
 
+   function Read (File       : in out File_Type;
+                  Terminator : Character := Character'Val (0))
+                  return String
+   is
+      X       : Word_8;
+      Index   : Natural := 0;
+      Result  : String (1 .. 64);
+   begin
+      loop
+         Read (File, X);
+         exit when X = Character'Pos (Terminator);
+         Index := Index + 1;
+         Result (Index) := Character'Val (X);
+         if Index = Result'Last then
+            return Result & Read (File, Terminator);
+         end if;
+      end loop;
+      return Result (1 .. Index);
+   end Read;
+
+   ----------
+   -- Read --
+   ----------
+
    procedure Read (File   : in out File_Type;
                    Item   :    out Word_32)
    is
