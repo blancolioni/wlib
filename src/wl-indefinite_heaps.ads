@@ -1,11 +1,12 @@
+private with Ada.Containers.Indefinite_Holders;
 private with Ada.Containers.Vectors;
 
 generic
    type Key_Type is private;
-   type Element_Type is private;
+   type Element_Type (<>) is private;
    with function "<" (Left, Right : Key_Type) return Boolean is <>;
    with function "=" (Left, Right : Element_Type) return Boolean is <>;
-package WL.Heaps is
+package WL.Indefinite_Heaps is
 
    type Heap is tagged private;
 
@@ -42,10 +43,13 @@ package WL.Heaps is
 
 private
 
+   package Element_Holders is
+     new Ada.Containers.Indefinite_Holders (Element_Type);
+
    type Heap_Element is
       record
-         Key : Key_Type;
-         Element : Element_Type;
+         Key     : Key_Type;
+         Element : Element_Holders.Holder;
       end record;
 
    package Heap_Vectors is
@@ -59,11 +63,11 @@ private
    function First_Element
      (Container : Heap)
       return Element_Type
-   is (Container.Vector.First_Element.Element);
+   is (Container.Vector.First_Element.Element.Element);
 
    function First_Key
      (Container : Heap)
       return Key_Type
    is (Container.Vector.First_Element.Key);
 
-end WL.Heaps;
+end WL.Indefinite_Heaps;
