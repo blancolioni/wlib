@@ -1,4 +1,4 @@
-package body WL.Heaps is
+package body WL.Indefinite_Heaps is
 
    procedure Heapify
      (Container : in out Heap'Class);
@@ -75,7 +75,7 @@ package body WL.Heaps is
       Element   : Element_Type)
    is
    begin
-      Container.Vector.Append ((Key, Element));
+      Container.Vector.Append ((Key, Element_Holders.To_Holder (Element)));
       Container.Sift_Up (1, Container.Vector.Last_Index);
    end Insert;
 
@@ -103,7 +103,7 @@ package body WL.Heaps is
    is
    begin
       for Item of Container.Vector loop
-         Process (Item.Key, Item.Element);
+         Process (Item.Key, Item.Element.Element);
       end loop;
    end Iterate;
 
@@ -119,7 +119,7 @@ package body WL.Heaps is
       Found : Boolean := False;
    begin
       for I in 1 .. Container.Vector.Last_Index loop
-         if Container.Vector.Element (I).Element = Element then
+         if Container.Vector.Element (I).Element.Element = Element then
             Found := True;
          elsif Found then
             Container.Vector.Replace_Element
@@ -128,8 +128,9 @@ package body WL.Heaps is
       end loop;
 
       pragma Assert (Found);
-      Container.Vector.Replace_Element (Container.Vector.Last_Index,
-                                        (Key, Element));
+      Container.Vector.Replace_Element
+        (Container.Vector.Last_Index,
+         (Key, Element_Holders.To_Holder (Element)));
       Container.Heapify;
    end Replace;
 
@@ -212,4 +213,4 @@ package body WL.Heaps is
         (Index_2, X);
    end Swap;
 
-end WL.Heaps;
+end WL.Indefinite_Heaps;

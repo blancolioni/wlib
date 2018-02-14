@@ -80,11 +80,11 @@ package body WL.Graphs is
       while not Frontier.Is_Empty loop
          declare
             Current      : constant Index_Type :=
-                             Frontier.Maximum_Element;
+                             Frontier.First_Element;
             Current_Cost : constant Cost_Type :=
                              Visited (Current).Cost_So_Far;
          begin
-            Frontier.Delete_Maximum;
+            Frontier.Delete_First;
 
             if Current /= Start then
                declare
@@ -685,13 +685,13 @@ package body WL.Graphs is
       while not Frontier.Is_Empty loop
          declare
             Current      : constant Index_Type :=
-                             Frontier.Maximum_Element;
+                             Frontier.First_Element;
             Current_V    : constant Vertex_Type :=
                              Container.Vs.Element (Current);
             Current_Cost : constant Cost_Type :=
                              Visited (Current).Cost_So_Far;
          begin
-            Frontier.Delete_Maximum;
+            Frontier.Delete_First;
 
             exit when Current = Finish;
 
