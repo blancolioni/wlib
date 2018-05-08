@@ -13,11 +13,11 @@ package body WL.Images.TGA is
       pragma Unreferenced (Image);
       File              : File_Type;
       ID_Length         : Word_8;
-      Colour_Map_Type   : Word_8;
+      Color_Map_Type   : Word_8;
       Image_Type        : Word_8;
-      Colour_Map_Offset : Word_16;
-      Colour_Map_Length : Word_16;
-      Colour_Map_Bits   : Word_8;
+      Color_Map_Offset : Word_16;
+      Color_Map_Length : Word_16;
+      Color_Map_Bits   : Word_8;
       X_Origin          : Word_16;
       Y_Origin          : Word_16;
       Image_Width       : Word_16;
@@ -28,11 +28,11 @@ package body WL.Images.TGA is
       Open (File, In_File, Path);
 
       Read (File, ID_Length);
-      Read (File, Colour_Map_Type);
+      Read (File, Color_Map_Type);
       Read (File, Image_Type);
-      Read (File, Colour_Map_Offset);
-      Read (File, Colour_Map_Length);
-      Read (File, Colour_Map_Bits);
+      Read (File, Color_Map_Offset);
+      Read (File, Color_Map_Length);
+      Read (File, Color_Map_Bits);
       Read (File, X_Origin);
       Read (File, Y_Origin);
       Read (File, Image_Width);

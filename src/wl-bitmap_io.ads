@@ -4,28 +4,28 @@ package WL.Bitmap_IO is
 
    type Bitmap_Type is private;
 
-   type Colour_Element is mod 256;
+   type Color_Element is mod 256;
 
-   type Colour_Type is
+   type Color_Type is
       record
-         B, G, R : Colour_Element;
-         Alpha   : Colour_Element;
+         B, G, R : Color_Element;
+         Alpha   : Color_Element;
       end record;
 
-   for Colour_Type'Size use 32;
+   for Color_Type'Size use 32;
 
    function Linear_Interpolation
-     (Start_Colour  : Colour_Type;
-      Finish_Colour : Colour_Type;
+     (Start_Color  : Color_Type;
+      Finish_Color : Color_Type;
       Start_Value   : Integer;
       Finish_Value  : Integer;
       Value         : Integer)
-      return Colour_Type;
+      return Color_Type;
 
    function Adjust_Brightness
-     (Colour     : Colour_Type;
+     (Color     : Color_Type;
       Factor     : Float)
-      return Colour_Type;
+      return Color_Type;
 
    procedure Read (Bitmap    : out Bitmap_Type;
                    File_Name : in  String);
@@ -43,48 +43,48 @@ package WL.Bitmap_IO is
    function Width (Item : Bitmap_Type) return Natural;
    function Height (Item : Bitmap_Type) return Natural;
    function Depth (Item : Bitmap_Type) return Natural;
-   function Colour (Item : Bitmap_Type;
+   function Color (Item : Bitmap_Type;
                     X, Y : Natural)
-                   return Colour_Type;
+                   return Color_Type;
 
-   procedure Set_Colour (Item   : Bitmap_Type;
+   procedure Set_Color (Item   : Bitmap_Type;
                          X, Y   : Natural;
-                         Colour : Colour_Type);
+                         Color : Color_Type);
 
-   function Has_Colourmap (Item : Bitmap_Type) return Boolean;
-   function Colour_Index (Item : Bitmap_Type;
+   function Has_Colormap (Item : Bitmap_Type) return Boolean;
+   function Color_Index (Item : Bitmap_Type;
                           X, Y : Natural)
-                         return Colour_Element;
-   function Colourmap_Colour (Item  : Bitmap_Type;
-                              Index : Colour_Element)
-                             return Colour_Type;
+                         return Color_Element;
+   function Colormap_Color (Item  : Bitmap_Type;
+                              Index : Color_Element)
+                             return Color_Type;
 
    procedure Set_Vertical_Flip (Value : Boolean := True);
 
 private
 
    type Bitmap_Data is
-     array (Natural range <>, Natural range <>) of Colour_Type;
+     array (Natural range <>, Natural range <>) of Color_Type;
 
    pragma Pack (Bitmap_Data);
 
-   type Bitmap_Colour_Index_Data is
-     array (Natural range <>, Natural range <>) of Colour_Element;
+   type Bitmap_Color_Index_Data is
+     array (Natural range <>, Natural range <>) of Color_Element;
 
    type Bitmap_Data_Access is access Bitmap_Data;
-   type Bitmap_Colour_Index_Access is access Bitmap_Colour_Index_Data;
+   type Bitmap_Color_Index_Access is access Bitmap_Color_Index_Data;
 
-   type Colourmap_Type is array (Colour_Element) of Colour_Type;
+   type Colormap_Type is array (Color_Element) of Color_Type;
 
-   type Colourmap_Access is access Colourmap_Type;
+   type Colormap_Access is access Colormap_Type;
 
    type Bitmap_Type is
       record
          Width, Height : Natural;
          Depth         : Natural;
          Data          : Bitmap_Data_Access;
-         Indices       : Bitmap_Colour_Index_Access;
-         Colourmap     : Colourmap_Access;
+         Indices       : Bitmap_Color_Index_Access;
+         Colormap     : Colormap_Access;
       end record;
 
 end WL.Bitmap_IO;

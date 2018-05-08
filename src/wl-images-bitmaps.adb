@@ -26,8 +26,8 @@ package body WL.Images.Bitmaps is
          Image_Size        : Word_32;
          Horizontal_Res    : Word_32;
          Vertical_Res      : Word_32;
-         Colourmap_Size    : Word_32;
-         Important_Colours : Word_32;
+         Colormap_Size    : Word_32;
+         Important_Colors : Word_32;
       end record;
 
    for Bitmap_Information_Header'Size use 40 * 8;
@@ -105,7 +105,7 @@ package body WL.Images.Bitmaps is
                                 Word_32 (X) * BPP / 8;
                Bit_Offset   : constant Natural :=
                                 Natural (X * BPP mod 8);
-               Colour       : Image_Color := (0, 0, 0, 0);
+               Color       : Image_Color := (0, 0, 0, 0);
                Image_X      : constant Pixel_X_Range :=
                                 Pixel_X_Range (X + 1);
                Image_Y      : constant Pixel_Y_Range :=
@@ -115,9 +115,9 @@ package body WL.Images.Bitmaps is
             begin
                if BPP >= 24 then
                   Copy (File, Row_Offset + Col_Offset, BPP / 8,
-                        Colour'Address);
-                  Fix_Color (Colour);
-                  Image.Set_Color (Image_X, Image_Y, Colour);
+                        Color'Address);
+                  Fix_Color (Color);
+                  Image.Set_Color (Image_X, Image_Y, Color);
                else
                   declare
                      Index : Word_8;
@@ -171,8 +171,8 @@ package body WL.Images.Bitmaps is
             Image_Size        : Word_32;
             Horizontal_Res    : Word_32;
             Vertical_Res      : Word_32;
-            Colourmap_Size    : Word_32;
-            Important_Colours : Word_32;
+            Colormap_Size    : Word_32;
+            Important_Colors : Word_32;
          end record;
 
       for Bitmap_Information_Header'Size use 40 * 8;
@@ -199,20 +199,20 @@ package body WL.Images.Bitmaps is
         32 * Word_32 (Image.Width) * Word_32 (Image.Height);
       Info_Header.Horizontal_Res := 2835;
       Info_Header.Vertical_Res   := 2835;
-      Info_Header.Colourmap_Size := 0;
-      Info_Header.Important_Colours := 0;
+      Info_Header.Colormap_Size := 0;
+      Info_Header.Important_Colors := 0;
 
       Write (File, Info_Header'Size / 8, Info_Header'Address);
 
       for Y in 1 .. Image.Height loop
          for X in 1 .. Image.Width loop
             declare
-               Colour : constant Image_Color := Image.Color (X, Y);
+               Color : constant Image_Color := Image.Color (X, Y);
             begin
-               Write (File, Word_8 (Colour.Blue));
-               Write (File, Word_8 (Colour.Green));
-               Write (File, Word_8 (Colour.Red));
-               Write (File, Word_8 (Colour.Alpha));
+               Write (File, Word_8 (Color.Blue));
+               Write (File, Word_8 (Color.Green));
+               Write (File, Word_8 (Color.Red));
+               Write (File, Word_8 (Color.Alpha));
             end;
          end loop;
       end loop;
