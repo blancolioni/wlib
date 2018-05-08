@@ -11,6 +11,9 @@ package WL.String_Sets is
       Element   : String)
       return Boolean;
 
+   procedure Clear
+     (Container : in out Set);
+
    procedure Insert
      (Container : in out Set;
       Element   : String);

@@ -1,5 +1,16 @@
 package body WL.String_Sets is
 
+   -----------
+   -- Clear --
+   -----------
+
+   procedure Clear
+     (Container : in out Set)
+   is
+   begin
+      Container.Container.Clear;
+   end Clear;
+
    ------------
    -- Delete --
    ------------
