@@ -9,12 +9,12 @@ package body WL.Bitmap_IO is
                                      Bitmap_Data_Access);
 
    procedure Free is
-     new Ada.Unchecked_Deallocation (Bitmap_Colour_Index_Data,
-                                     Bitmap_Colour_Index_Access);
+     new Ada.Unchecked_Deallocation (Bitmap_Color_Index_Data,
+                                     Bitmap_Color_Index_Access);
 
    procedure Free is
-     new Ada.Unchecked_Deallocation (Colourmap_Type,
-                                     Colourmap_Access);
+     new Ada.Unchecked_Deallocation (Colormap_Type,
+                                     Colormap_Access);
 
    Reversed : Boolean := False;
 
@@ -42,8 +42,8 @@ package body WL.Bitmap_IO is
          Image_Size        : Word_32;
          Horizontal_Res    : Word_32;
          Vertical_Res      : Word_32;
-         Colourmap_Size    : Word_32;
-         Important_Colours : Word_32;
+         Colormap_Size    : Word_32;
+         Important_Colors : Word_32;
       end record;
 
    for Bitmap_Information_Header'Size use 40 * 8;
@@ -53,23 +53,23 @@ package body WL.Bitmap_IO is
    -----------------------
 
    function Adjust_Brightness
-     (Colour     : Colour_Type;
+     (Color     : Color_Type;
       Factor     : Float)
-      return Colour_Type
+      return Color_Type
    is
       R : constant Float :=
             Float'Min
-              (Float (Colour.R) * Factor, 255.0);
+              (Float (Color.R) * Factor, 255.0);
       G : constant Float :=
             Float'Min
-              (Float (Colour.G) * Factor, 255.0);
+              (Float (Color.G) * Factor, 255.0);
       B : constant Float :=
             Float'Min
-              (Float (Colour.B) * Factor, 255.0);
+              (Float (Color.B) * Factor, 255.0);
    begin
-      return (R => Colour_Element (R),
-              G => Colour_Element (G),
-              B => Colour_Element (B),
+      return (R => Color_Element (R),
+              G => Color_Element (G),
+              B => Color_Element (B),
               Alpha => 255);
    end Adjust_Brightness;
 
@@ -85,50 +85,50 @@ package body WL.Bitmap_IO is
       if Bitmap.Indices /= null then
          Free (Bitmap.Indices);
       end if;
-      if Bitmap.Colourmap /= null then
-         Free (Bitmap.Colourmap);
+      if Bitmap.Colormap /= null then
+         Free (Bitmap.Colormap);
       end if;
    end Close;
 
    ------------
-   -- Colour --
+   -- Color --
    ------------
 
-   function Colour (Item : Bitmap_Type;
+   function Color (Item : Bitmap_Type;
                     X, Y : Natural)
-                   return Colour_Type
+                   return Color_Type
    is
    begin
-      if Has_Colourmap (Item) then
-         return Colourmap_Colour (Item, Colour_Index (Item, X, Y));
+      if Has_Colormap (Item) then
+         return Colormap_Color (Item, Color_Index (Item, X, Y));
       else
          return Item.Data (X, Y);
       end if;
-   end Colour;
+   end Color;
 
    ------------------
-   -- Colour_Index --
+   -- Color_Index --
    ------------------
 
-   function Colour_Index (Item : Bitmap_Type;
+   function Color_Index (Item : Bitmap_Type;
                           X, Y : Natural)
-                         return Colour_Element
+                         return Color_Element
    is
    begin
       return Item.Indices (X, Y);
-   end Colour_Index;
+   end Color_Index;
 
    ----------------------
-   -- Colourmap_Colour --
+   -- Colormap_Color --
    ----------------------
 
-   function Colourmap_Colour (Item  : Bitmap_Type;
-                              Index : Colour_Element)
-                             return Colour_Type
+   function Colormap_Color (Item  : Bitmap_Type;
+                              Index : Color_Element)
+                             return Color_Type
    is
    begin
-      return Item.Colourmap (Index);
-   end Colourmap_Colour;
+      return Item.Colormap (Index);
+   end Colormap_Color;
 
    -----------
    -- Depth --
@@ -140,13 +140,13 @@ package body WL.Bitmap_IO is
    end Depth;
 
    -------------------
-   -- Has_Colourmap --
+   -- Has_Colormap --
    -------------------
 
-   function Has_Colourmap (Item : Bitmap_Type) return Boolean is
+   function Has_Colormap (Item : Bitmap_Type) return Boolean is
    begin
-      return Item.Colourmap /= null;
-   end Has_Colourmap;
+      return Item.Colormap /= null;
+   end Has_Colormap;
 
    ------------
    -- Height --
@@ -162,25 +162,25 @@ package body WL.Bitmap_IO is
    --------------------------
 
    function Linear_Interpolation
-     (Start_Colour  : Colour_Type;
-      Finish_Colour : Colour_Type;
+     (Start_Color  : Color_Type;
+      Finish_Color : Color_Type;
       Start_Value   : Integer;
       Finish_Value  : Integer;
       Value         : Integer)
-      return Colour_Type
+      return Color_Type
    is
-      function Interpolate (Start, Finish : Colour_Element)
-                            return Colour_Element;
+      function Interpolate (Start, Finish : Color_Element)
+                            return Color_Element;
 
       -----------------
       -- Interpolate --
       -----------------
 
-      function Interpolate (Start, Finish : Colour_Element)
-                            return Colour_Element
+      function Interpolate (Start, Finish : Color_Element)
+                            return Color_Element
       is
       begin
-         return Colour_Element ((Integer (Finish) - Integer (Start)) *
+         return Color_Element ((Integer (Finish) - Integer (Start)) *
                                 (Value - Start_Value)
                                 / (Finish_Value - Start_Value)
                                + Integer (Start));
@@ -188,12 +188,12 @@ package body WL.Bitmap_IO is
 
    begin
       if Start_Value = Finish_Value then
-         return Start_Colour;
+         return Start_Color;
       else
-         return (Interpolate (Start_Colour.B, Finish_Colour.B),
-                 Interpolate (Start_Colour.G, Finish_Colour.G),
-                 Interpolate (Start_Colour.R, Finish_Colour.R),
-                 Interpolate (Start_Colour.Alpha, Finish_Colour.Alpha));
+         return (Interpolate (Start_Color.B, Finish_Color.B),
+                 Interpolate (Start_Color.G, Finish_Color.G),
+                 Interpolate (Start_Color.R, Finish_Color.R),
+                 Interpolate (Start_Color.Alpha, Finish_Color.Alpha));
       end if;
    end Linear_Interpolation;
 
@@ -208,7 +208,7 @@ package body WL.Bitmap_IO is
          Depth        => 32,
          Data         => new Bitmap_Data (0 .. Width - 1, 0 .. Height - 1),
          Indices      => null,
-         Colourmap    => null);
+         Colormap    => null);
    begin
       Result.Data.all := (others => (others => (0, 0, 0, 1)));
       return Result;
@@ -244,7 +244,7 @@ package body WL.Bitmap_IO is
       Info_Header    : Bitmap_Information_Header;
       Row_Size       : Word_32;
       BPP            : Word_32;
-      Used           : array (Colour_Element) of Natural;
+      Used           : array (Color_Element) of Natural;
    begin
       Copy (File, 0, 2, Magic'Address);
       if Magic /= "BM" then
@@ -263,12 +263,12 @@ package body WL.Bitmap_IO is
 
       if BPP <= 8 then
          Bitmap.Indices :=
-           new Bitmap_Colour_Index_Data (0 .. Bitmap.Width - 1,
+           new Bitmap_Color_Index_Data (0 .. Bitmap.Width - 1,
                                          0 .. Bitmap.Height - 1);
-         Bitmap.Colourmap := new Colourmap_Type;
+         Bitmap.Colormap := new Colormap_Type;
          Copy (File, 14 + Info_Header.Header_Size,
                2**Natural (BPP) * 4,
-               Bitmap.Colourmap.all'Address);
+               Bitmap.Colormap.all'Address);
          Used := (others => 0);
       else
 
@@ -291,27 +291,27 @@ package body WL.Bitmap_IO is
                                 Word_32 (X) * BPP / 8;
                Bit_Offset   : constant Natural :=
                                 X * Natural (BPP) mod 8;
-               Colour       : Colour_Type := (0, 0, 0, 0);
+               Color       : Color_Type := (0, 0, 0, 0);
             begin
                if BPP >= 24 then
                   Copy (File, Row_Offset + Col_Offset, BPP / 8,
-                        Colour'Address);
+                        Color'Address);
                   if Reversed then
-                     Bitmap.Data (X, Bitmap.Height - Y - 1) := Colour;
+                     Bitmap.Data (X, Bitmap.Height - Y - 1) := Color;
                   else
-                     Bitmap.Data (X, Y) := Colour;
+                     Bitmap.Data (X, Y) := Color;
                   end if;
                else
                   declare
                      W8    : Word_8;
-                     Index : Colour_Element;
+                     Index : Color_Element;
                   begin
                      Read (File, W8, Row_Offset + Col_Offset);
                      if BPP < 8 then
                         W8 := W8 / (2 ** Bit_Offset)
                         mod (2 ** Natural (BPP));
                      end if;
-                     Index := Colour_Element (W8);
+                     Index := Color_Element (W8);
                      Used (Index) := Used (Index) + 1;
                      if Reversed then
                         Bitmap.Indices (X, Bitmap.Height - Y - 1) := Index;
@@ -327,16 +327,16 @@ package body WL.Bitmap_IO is
    end Read;
 
    ----------------
-   -- Set_Colour --
+   -- Set_Color --
    ----------------
 
-   procedure Set_Colour (Item   : Bitmap_Type;
+   procedure Set_Color (Item   : Bitmap_Type;
                          X, Y   : Natural;
-                         Colour : Colour_Type)
+                         Color : Color_Type)
    is
    begin
-      Item.Data (X, Y) := Colour;
-   end Set_Colour;
+      Item.Data (X, Y) := Color;
+   end Set_Color;
 
    -----------------------
    -- Set_Vertical_Flip --
@@ -387,23 +387,23 @@ package body WL.Bitmap_IO is
         32 * Word_32 (Bitmap.Width) * Word_32 (Bitmap.Height);
       Info_Header.Horizontal_Res := 2835;
       Info_Header.Vertical_Res   := 2835;
-      Info_Header.Colourmap_Size := 0;
-      Info_Header.Important_Colours := 0;
+      Info_Header.Colormap_Size := 0;
+      Info_Header.Important_Colors := 0;
 
       Write (File, Info_Header'Size / 8, Info_Header'Address);
 
       for Y in 0 .. Bitmap.Height - 1 loop
          for X in 0 .. Bitmap.Width - 1 loop
             declare
-               Colour : constant Colour_Type :=
+               Color : constant Color_Type :=
                           (if Bitmap.Depth >= 24
                            then Bitmap.Data (X, Y)
-                           else Bitmap.Colourmap (Bitmap.Indices (X, Y)));
+                           else Bitmap.Colormap (Bitmap.Indices (X, Y)));
             begin
-               Write (File, Word_8 (Colour.B));
-               Write (File, Word_8 (Colour.G));
-               Write (File, Word_8 (Colour.R));
-               Write (File, Word_8 (Colour.Alpha));
+               Write (File, Word_8 (Color.B));
+               Write (File, Word_8 (Color.G));
+               Write (File, Word_8 (Color.R));
+               Write (File, Word_8 (Color.Alpha));
             end;
          end loop;
       end loop;

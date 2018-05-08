@@ -39,7 +39,7 @@ package body WL.Images.FLC is
       Size                  : Word_32;
       Magic                 : Word_16;
       Frames, Width, Height : Word_16;
-      Colour_Depth          : Word_16;
+      Color_Depth          : Word_16;
       Flags                 : Word_16;
       Speed                 : Word_32;
       Offset_Frame_1        : Word_32;
@@ -261,7 +261,7 @@ package body WL.Images.FLC is
                             & (if Frames = 1 then "" else "s")
                             & Width'Img & " x" & Height'Img);
 
-      Read (File, Colour_Depth);
+      Read (File, Color_Depth);
       Read (File, Flags);
 
       Read (File, Speed);

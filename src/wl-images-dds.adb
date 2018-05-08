@@ -65,12 +65,12 @@ package body WL.Images.DDS is
       X      : Pixel_X_Range;
       Y      : Pixel_Y_Range);
 
-   function From_Colour_16
-     (Colour : Word_16;
+   function From_Color_16
+     (Color : Word_16;
       Alpha  : Boolean)
       return Image_Color;
 
-   function Interpolate (Colour_1, Colour_2 : Image_Color;
+   function Interpolate (Color_1, Color_2 : Image_Color;
                          Ratio              : Float)
                          return Image_Color;
 
@@ -85,22 +85,22 @@ package body WL.Images.DDS is
       X      : Pixel_X_Range;
       Y      : Pixel_Y_Range)
    is
-      Colour      : array (0 .. 3) of Image_Color;
+      Color      : array (0 .. 3) of Image_Color;
    begin
       case Format is
          when DXT_1 =>
-            Colour (0) :=
-              From_Colour_16 (Word_16 (Block (Block'First))
+            Color (0) :=
+              From_Color_16 (Word_16 (Block (Block'First))
                               + 256 * Word_16 (Block (Block'First + 1)),
                               False);
-            Colour (1) :=
-              From_Colour_16 (Word_16 (Block (Block'First + 2))
+            Color (1) :=
+              From_Color_16 (Word_16 (Block (Block'First + 2))
                               + 256 * Word_16 (Block (Block'First + 3)),
                               False);
-            Colour (2) :=
-              Interpolate (Colour (0), Colour (1), 2.0 / 3.0);
-            Colour (3) :=
-              Interpolate (Colour (0), Colour (1), 1.0 / 3.0);
+            Color (2) :=
+              Interpolate (Color (0), Color (1), 2.0 / 3.0);
+            Color (3) :=
+              Interpolate (Color (0), Color (1), 1.0 / 3.0);
 
             for I in Pixel_Y_Count range 0 .. 3 loop
                for J in Pixel_X_Count range 0 .. 3 loop
@@ -109,7 +109,7 @@ package body WL.Images.DDS is
                                Natural
                                  ((Block (Word_32 (I) + Block'First + 4)
                                   / (2 ** (Natural (J) * 2))) mod 4);
-                     C     : constant Image_Color := Colour (Index);
+                     C     : constant Image_Color := Color (Index);
                   begin
                      Dest (X + J, Y + I) := C;
                   end;
@@ -142,37 +142,37 @@ package body WL.Images.DDS is
    end Copy_DXT_Block;
 
    --------------------
-   -- From_Colour_16 --
+   -- From_Color_16 --
    --------------------
 
-   function From_Colour_16
-     (Colour : Word_16;
+   function From_Color_16
+     (Color : Word_16;
       Alpha  : Boolean)
       return Image_Color
    is
       R, G, B, A : Word_16;
    begin
-      B := 8 * (Colour mod 32);
+      B := 8 * (Color mod 32);
       if Alpha then
-         G := 8 * ((Colour / 32) mod 32);
-         R := 8 * ((Colour / 32 / 32) mod 32);
-         A := (if Colour >= 32768 then 255 else 0);
+         G := 8 * ((Color / 32) mod 32);
+         R := 8 * ((Color / 32 / 32) mod 32);
+         A := (if Color >= 32768 then 255 else 0);
       else
-         G := 4 * ((Colour / 32) mod 64);
-         R := 8 * ((Colour / 32 / 64) mod 32);
+         G := 4 * ((Color / 32) mod 64);
+         R := 8 * ((Color / 32 / 64) mod 32);
          A := 255;
       end if;
       return (Red   => Color_Element (R),
               Green => Color_Element (G),
               Blue  => Color_Element (B),
               Alpha => Color_Element (A));
-   end From_Colour_16;
+   end From_Color_16;
 
    -----------------
    -- Interpolate --
    -----------------
 
-   function Interpolate (Colour_1, Colour_2 : Image_Color;
+   function Interpolate (Color_1, Color_2 : Image_Color;
                          Ratio              : Float)
                          return Image_Color
    is
@@ -189,10 +189,10 @@ package body WL.Images.DDS is
       end Inter;
 
    begin
-      return (Red => Inter (Colour_1.Red, Colour_2.Red),
-              Green => Inter (Colour_1.Green, Colour_2.Green),
-              Blue  => Inter (Colour_1.Blue, Colour_2.Blue),
-              Alpha => Inter (Colour_1.Alpha, Colour_2.Alpha));
+      return (Red => Inter (Color_1.Red, Color_2.Red),
+              Green => Inter (Color_1.Green, Color_2.Green),
+              Blue  => Inter (Color_1.Blue, Color_2.Blue),
+              Alpha => Inter (Color_1.Alpha, Color_2.Alpha));
    end Interpolate;
 
    --------------
