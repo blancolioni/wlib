@@ -39,4 +39,19 @@ package body WL.String_Sets is
       end if;
    end Insert;
 
+   -------------
+   -- Iterate --
+   -------------
+
+   procedure Iterate
+     (Container : Set;
+      Process   : not null access
+        procedure (Item : String))
+   is
+   begin
+      for Item in Container.Container.Iterate loop
+         Process (Sets.Key (Item));
+      end loop;
+   end Iterate;
+
 end WL.String_Sets;
