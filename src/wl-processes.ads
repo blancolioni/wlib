@@ -1,3 +1,5 @@
+with Ada.Calendar;
+
 package WL.Processes is
 
    type Process_Type is tagged limited private;
@@ -15,18 +17,23 @@ package WL.Processes is
                                Finish    : Positive;
                                Tick_Size : Positive := 1);
 
+   procedure Start_Counter (Process   :    out Process_Type;
+                            Name      : String;
+                            Tick_Size : Positive := 1);
+
    procedure Tick (Process : in out Process_Type);
 
    procedure Finish (Process : in out Process_Type);
 
 private
 
-   type Display_Type is (Bar, Spinner, Percentage);
+   type Display_Type is (Bar, Spinner, Percentage, Counter);
 
    type Process_Type is tagged limited
       record
          Name    : access String;
          Display : Display_Type;
+         Prev    : Ada.Calendar.Time;
          Finish  : Natural  := 0;
          Tick    : Natural  := 0;
          Step    : Positive := 1;

@@ -22,6 +22,11 @@ package body WL.Processes is
             Put (Ada.Text_IO.Standard_Error,
                  Character'Val (13) &
                    Process.Name.all & ": 100%");
+         when Counter =>
+            Put (Ada.Text_IO.Standard_Error,
+                 Character'Val (13)
+                 & Process.Name.all & ":"
+                 & Natural'Image (Process.Tick));
       end case;
 
       Process.Tick := 0;
@@ -44,6 +49,24 @@ package body WL.Processes is
       Process.Tick    := 0;
       Process.Step    := Tick_Size;
    end Start_Bar;
+
+   -------------------
+   -- Start_Counter --
+   -------------------
+
+   procedure Start_Counter (Process   :    out Process_Type;
+                            Name      : String;
+                            Tick_Size : Positive := 1)
+   is
+   begin
+      Put (Ada.Text_IO.Standard_Error, Name & ": 0");
+      Flush (Ada.Text_IO.Standard_Error);
+      Process.Name    := new String'(Name);
+      Process.Display := Counter;
+      Process.Tick    := 0;
+      Process.Step    := Tick_Size;
+      Process.Prev    := Ada.Calendar.Clock;
+   end Start_Counter;
 
    ----------------------
    -- Start_Percentage --
@@ -123,6 +146,20 @@ package body WL.Processes is
                             Process.Name.all & ":"
                           & Natural'Image (Value) & "%");
                      Flush (Ada.Text_IO.Standard_Error);
+                  end if;
+               end;
+            when Counter =>
+               declare
+                  use Ada.Calendar;
+                  Now : constant Time := Clock;
+               begin
+                  if Now - Process.Prev > 0.1 then
+                     Put (Ada.Text_IO.Standard_Error,
+                          Character'Val (13)
+                          & Process.Name.all & ":"
+                          & Natural'Image (Process.Tick));
+                     Flush (Ada.Text_IO.Standard_Error);
+                     Process.Prev := Now;
                   end if;
                end;
          end case;
