@@ -1,10 +1,10 @@
 with Ada.Strings.Fixed;
 
-package body WL.Quantities is
+package body WL.Generic_Quantities is
 
-   Local_Random_Unit_Float : Random_Unit_Float;
+   Local_Random_Unit_Real : Random_Unit_Real;
 
-   function Significant_Digits_Image (Item : Float;
+   function Significant_Digits_Image (Item : Real;
                                       Sig  : Positive)
                                      return String;
 
@@ -13,29 +13,29 @@ package body WL.Quantities is
    ------------
 
    function Around (X          : Quantity_Type;
-                    Inflection : Unit_Float := 0.1;
+                    Inflection : Unit_Real := 0.1;
                     Shape      : Distribution_Type := Linear)
                     return Quantity_Type
    is
-      Factor : Unit_Float := 1.0;
+      Factor : Unit_Real := 1.0;
    begin
-      if Local_Random_Unit_Float = null then
+      if Local_Random_Unit_Real = null then
          return X;
       end if;
 
       case Shape is
          when Linear =>
             Factor :=
-              1.0 - Inflection + Local_Random_Unit_Float.all * 2.0 * Factor;
+              1.0 - Inflection + Local_Random_Unit_Real.all * 2.0 * Factor;
          when Quadratic =>
             Factor :=
-              1.0 - Inflection + Local_Random_Unit_Float.all * 2.0 * Factor;
-         when Bell =>
+              1.0 - Inflection + Local_Random_Unit_Real.all * 2.0 * Factor;
+         when Normal =>
             Factor :=
-              1.0 - Inflection + Local_Random_Unit_Float.all * 2.0 * Factor;
+              1.0 - Inflection + Local_Random_Unit_Real.all * 2.0 * Factor;
       end case;
 
-      return Quantity_Type (Float (X) * Factor);
+      return Quantity_Type (Real (X) * Factor);
    end Around;
 
    -----------
@@ -72,11 +72,11 @@ package body WL.Quantities is
 
    function Scale
      (X      : Quantity_Type;
-      Factor : Float)
+      Factor : Real)
       return Quantity_Type
    is
    begin
-      return Quantity_Type (Float (X) * Factor);
+      return Quantity_Type (Real (X) * Factor);
    end Scale;
 
    ----------------
@@ -94,15 +94,15 @@ package body WL.Quantities is
    end Scale_Down;
 
    ---------------------------
-   -- Set_Random_Unit_Float --
+   -- Set_Random_Unit_Real --
    ---------------------------
 
-   procedure Set_Random_Unit_Float
-     (Fn : Random_Unit_Float)
+   procedure Set_Random_Unit_Real
+     (Fn : Random_Unit_Real)
    is
    begin
-      Local_Random_Unit_Float := Fn;
-   end Set_Random_Unit_Float;
+      Local_Random_Unit_Real := Fn;
+   end Set_Random_Unit_Real;
 
    ----------
    -- Show --
@@ -110,13 +110,13 @@ package body WL.Quantities is
 
    function Show (Item : Quantity_Type) return String is
 
-      Factors    : constant array (1 .. 3) of Float :=
+      Factors    : constant array (1 .. 3) of Real :=
                      (1.0E9, 1.0E6, 1.0E3);
       Extensions : constant String := "GMK";
    begin
       for I in Factors'Range loop
-         if Float (Item) > Factors (I) then
-            return Significant_Digits_Image (Float (Item) / Factors (I), 3) &
+         if Real (Item) > Factors (I) then
+            return Significant_Digits_Image (Real (Item) / Factors (I), 3) &
             (1 => Extensions (I));
          end if;
       end loop;
@@ -130,14 +130,14 @@ package body WL.Quantities is
    -- Significant_Digits_Image --
    ------------------------------
 
-   function Significant_Digits_Image (Item : Float;
+   function Significant_Digits_Image (Item : Real;
                                       Sig  : Positive)
                                      return String
    is
       Result    : String (1 .. Sig);
       Point     : Natural := 0;
-      Acc       : Float := Item;
-      Boundary  : constant Float := 10.0**Sig;
+      Acc       : Real := Item;
+      Boundary  : constant Real := 10.0**Sig;
    begin
       if Item < 1.0 / Boundary then
          return "0.00";
@@ -183,15 +183,6 @@ package body WL.Quantities is
       end if;
    end Significant_Digits_Image;
 
-   --------------
-   -- To_Float --
-   --------------
-
-   function To_Float (Value : Quantity_Type) return Float is
-   begin
-      return Float (Value);
-   end To_Float;
-
    ----------------
    -- To_Natural --
    ----------------
@@ -205,10 +196,19 @@ package body WL.Quantities is
    -- To_Quantity --
    -----------------
 
-   function To_Quantity (Value : Float) return Quantity_Type is
+   function To_Quantity (Value : Real) return Quantity_Type is
    begin
       return Quantity_Type (Value);
    end To_Quantity;
+
+   --------------
+   -- To_Real --
+   --------------
+
+   function To_Real (Value : Quantity_Type) return Real is
+   begin
+      return Real (Value);
+   end To_Real;
 
    ----------
    -- Unit --
@@ -252,4 +252,4 @@ package body WL.Quantities is
       return 0;
    end Zero;
 
-end WL.Quantities;
+end WL.Generic_Quantities;

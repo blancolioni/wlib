@@ -1,6 +1,6 @@
 with Ada.Strings.Fixed;
 
-package body WL.Money is
+package body WL.Generic_Money is
 
    Local_Currency_Symbol       : String := "$   ";
    Local_Digit_Grouping_Symbol : String := ",   ";
@@ -11,7 +11,7 @@ package body WL.Money is
    -------------
 
    function Add_Tax (Money    : Money_Type;
-                     Tax_Rate : Float)
+                     Tax_Rate : Real)
                      return Money_Type
    is
    begin
@@ -28,7 +28,7 @@ package body WL.Money is
 
    function Add_Tax
      (Price : Price_Type;
-      Tax_Rate : Float)
+      Tax_Rate : Real)
       return Price_Type
    is
    begin
@@ -40,11 +40,11 @@ package body WL.Money is
    ------------
 
    function Adjust (Money    : Money_Type;
-                    Factor   : Float)
+                    Factor   : Real)
                     return Money_Type
    is
    begin
-      return To_Money (To_Float (Money) * Factor);
+      return To_Money (To_Real (Money) * Factor);
    end Adjust;
 
    ------------------
@@ -52,11 +52,11 @@ package body WL.Money is
    ------------------
 
    function Adjust_Price (Price    : Price_Type;
-                          Factor   : Float)
+                          Factor   : Real)
                          return Price_Type
    is
    begin
-      return Price_Type (Float (Price) * Factor);
+      return Price_Type (Real (Price) * Factor);
    end Adjust_Price;
 
    ---------------------
@@ -100,7 +100,7 @@ package body WL.Money is
    is
    begin
       return Quantities.To_Quantity
-        (Float (Total_Cash / Money_Type (Price)));
+        (Real (Total_Cash / Money_Type (Price)));
    end Get_Quantity;
 
    -----------
@@ -186,7 +186,7 @@ package body WL.Money is
          return Zero;
       else
          return Price_Type
-           (Float (Total) / Quantities.To_Float (Quantity_Type));
+           (Real (Total) / Quantities.To_Real (Quantity_Type));
       end if;
    end Price;
 
@@ -268,16 +268,16 @@ package body WL.Money is
          end if;
       end Show_Exact;
 
-      Float_Value : constant Float := To_Float (Price);
+      Real_Value : constant Real := To_Real (Price);
 
    begin
-      if Exact or else Float_Value < 10_000.0 then
+      if Exact or else Real_Value < 10_000.0 then
          return Show_Exact (Price);
-      elsif Float_Value < 1.0E6 then
+      elsif Real_Value < 1.0E6 then
          return Show_Exact (Price / 1e3) & "K";
-      elsif Float_Value < 1.0E9 then
+      elsif Real_Value < 1.0E9 then
          return Show_Exact (Price / 1e6) & "M";
-      elsif Float_Value < 1.0E12 then
+      elsif Real_Value < 1.0E12 then
          return Show_Exact (Price / 1e9) & "B";
       else
          return Show_Exact (Price / 1e12) & "T";
@@ -290,11 +290,11 @@ package body WL.Money is
 
    function Split
      (Amount  : Money_Type;
-      Portion : Float)
+      Portion : Real)
       return Money_Type
    is
    begin
-      return Money_Type (Float (Amount) * Portion);
+      return Money_Type (Real (Amount) * Portion);
    end Split;
 
    ---------
@@ -302,14 +302,14 @@ package body WL.Money is
    ---------
 
    function Tax (Money : Money_Type;
-                 Tax   : Float)
+                 Tax   : Real)
                  return Money_Type
    is
    begin
       if Money < 0 then
          return 0;
       else
-         return Money_Type (Float (Money) * Tax);
+         return Money_Type (Real (Money) * Tax);
       end if;
    end Tax;
 
@@ -318,30 +318,30 @@ package body WL.Money is
    ---------
 
    function Tax (Price   : Price_Type;
-                            Tax     : Float)
+                            Tax     : Real)
                             return Price_Type
    is
    begin
-      return Price_Type (Float (Price) * Tax);
+      return Price_Type (Real (Price) * Tax);
    end Tax;
-
-   --------------
-   -- To_Float --
-   --------------
-
-   function To_Float (Amount : Money_Type) return Float is
-   begin
-      return Float (Amount) / 1000.0;
-   end To_Float;
 
    --------------
    -- To_Money --
    --------------
 
-   function To_Money (Amount : Float) return Money_Type is
+   function To_Money (Amount : Real) return Money_Type is
    begin
-      return Money_Type (Float'Truncation (Amount * 1000.0));
+      return Money_Type (Real'Truncation (Amount * 1000.0));
    end To_Money;
+
+   --------------
+   -- To_Real --
+   --------------
+
+   function To_Real (Amount : Money_Type) return Real is
+   begin
+      return Real (Amount) / 1000.0;
+   end To_Real;
 
    -----------
    -- Total --
@@ -353,7 +353,7 @@ package body WL.Money is
    is
       use Quantities;
    begin
-      return Money_Type (Float (Price) * To_Float (Quantity_Type));
+      return Money_Type (Real (Price) * To_Real (Quantity_Type));
    end Total;
 
    -----------
@@ -384,7 +384,7 @@ package body WL.Money is
       elsif Image (Image'Last) = 'G' then
          return Value (Image (Image'First .. Image'Last - 1)) * 1E9;
       else
-         return Money_Type (Float'Value (Image));
+         return Money_Type (Real'Value (Image));
       end if;
    end Value;
 
@@ -394,7 +394,7 @@ package body WL.Money is
 
    function Value (Image : String) return Price_Type is
    begin
-      return To_Price (Float'Value (Image));
+      return To_Price (Real'Value (Image));
    end Value;
 
    -----------------
@@ -403,14 +403,14 @@ package body WL.Money is
 
    function Without_Tax
      (Money : Money_Type;
-      Tax   : Float)
+      Tax   : Real)
       return Money_Type
    is
    begin
       if Money < 0 then
          return Money;
       else
-         return Money_Type (Float (Money) / (1.0 + Tax));
+         return Money_Type (Real (Money) / (1.0 + Tax));
       end if;
    end Without_Tax;
 
@@ -420,7 +420,7 @@ package body WL.Money is
 
    function Without_Tax
      (Price   : Price_Type;
-      Tax     : Float)
+      Tax     : Real)
       return Price_Type
    is
    begin
@@ -445,4 +445,4 @@ package body WL.Money is
       return 0;
    end Zero;
 
-end WL.Money;
+end WL.Generic_Money;
