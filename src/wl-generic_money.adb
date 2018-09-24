@@ -235,16 +235,23 @@ package body WL.Generic_Money is
       return String
    is
 
-      function Show_Exact (Value : Price_Type) return String;
+      function Show_Exact
+        (Value : Price_Type;
+         Cents : Boolean)
+         return String;
 
       ----------------
       -- Show_Exact --
       ----------------
-
-      function Show_Exact (Value : Price_Type) return String is
+      function Show_Exact
+        (Value : Price_Type;
+         Cents : Boolean)
+         return String
+      is
          Image    : constant String :=
                       Ada.Strings.Fixed.Trim
-                        (Price_Type'Image ((Value + 5) / 10),
+                        (Price_Type'Image
+                           ((Value + 5) / (if Cents then 10 else 100)),
                          Ada.Strings.Left);
          Currency : constant String := Currency_Symbol;
 
@@ -260,6 +267,11 @@ package body WL.Generic_Money is
             return Currency & "0" & Decimal_Symbol & "0" & Image;
          elsif Image'Length = 2 then
             return Currency & "0" & Decimal_Symbol & Image;
+         elsif not Cents then
+            return Currency
+              & Group (Image (Image'First .. Image'Last - 1))
+              & Decimal_Symbol
+              & Image (Image'Last .. Image'Last);
          else
             return Currency
               & Group (Image (Image'First .. Image'Last - 2))
@@ -272,15 +284,15 @@ package body WL.Generic_Money is
 
    begin
       if Exact or else Real_Value < 10_000.0 then
-         return Show_Exact (Price);
+         return Show_Exact (Price, True);
       elsif Real_Value < 1.0E6 then
-         return Show_Exact (Price / 1e3) & "K";
+         return Show_Exact (Price / 1e3, False) & "K";
       elsif Real_Value < 1.0E9 then
-         return Show_Exact (Price / 1e6) & "M";
+         return Show_Exact (Price / 1e6, False) & "M";
       elsif Real_Value < 1.0E12 then
-         return Show_Exact (Price / 1e9) & "B";
+         return Show_Exact (Price / 1e9, False) & "B";
       else
-         return Show_Exact (Price / 1e12) & "T";
+         return Show_Exact (Price / 1e12, False) & "T";
       end if;
    end Show;
 
