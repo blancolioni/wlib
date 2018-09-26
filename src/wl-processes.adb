@@ -1,3 +1,4 @@
+with Ada.Integer_Text_IO;
 with Ada.Text_IO;                       use Ada.Text_IO;
 
 package body WL.Processes is
@@ -17,7 +18,17 @@ package body WL.Processes is
                              Character'Val (8) & ' ');
             Ada.Text_IO.Flush (Ada.Text_IO.Standard_Error);
          when Bar =>
-            null;
+            declare
+               Count  : constant Natural := Process.Bar_Length;
+               Final  : constant String (1 .. Count) :=
+                          (others => '=');
+            begin
+               Put
+                 (Ada.Text_IO.Standard_Error,
+                  Character'Val (13)
+                  & Process.Name.all
+                  & ": 100% [" & Final & "]");
+            end;
          when Percentage =>
             Put (Ada.Text_IO.Standard_Error,
                  Character'Val (13) &
@@ -38,16 +49,25 @@ package body WL.Processes is
    ---------------
 
    procedure Start_Bar
-     (Process   :    out Process_Type;
-      Name      : String;
-      Tick_Size : Positive := 1)
+     (Process    :    out Process_Type;
+      Name       : String;
+      Finish     : Positive;
+      Bar_Length : Natural  := 40;
+      Tick_Size  : Positive := 1)
    is
+      Spaces : constant String (1 .. Process.Bar_Length) :=
+                 (others => ' ');
    begin
-      Put (Ada.Text_IO.Standard_Error, Name & ": ");
+      Put (Ada.Text_IO.Standard_Error,
+           Name & ":      [" & Spaces & "]");
       Flush (Ada.Text_IO.Standard_Error);
+      Process.Name    := new String'(Name);
       Process.Display := Bar;
       Process.Tick    := 0;
+      Process.Finish  := Finish;
       Process.Step    := Tick_Size;
+      Process.Acc     := 1;
+      Process.Bar_Length := Bar_Length;
    end Start_Bar;
 
    -------------------
@@ -72,10 +92,11 @@ package body WL.Processes is
    -- Start_Percentage --
    ----------------------
 
-   procedure Start_Percentage (Process   :    out Process_Type;
-                               Name      : String;
-                               Finish    : Positive;
-                               Tick_Size : Positive := 1)
+   procedure Start_Percentage
+     (Process   :    out Process_Type;
+      Name      : String;
+      Finish    : Positive;
+      Tick_Size : Positive := 1)
    is
    begin
       Put (Ada.Text_IO.Standard_Error, Name & ": 0%");
@@ -114,24 +135,64 @@ package body WL.Processes is
    procedure Tick (Process : in out Process_Type) is
    begin
       Process.Tick := Process.Tick + 1;
+      if Process.Tick > Process.Finish then
+         Process.Tick := Process.Finish;
+      end if;
+
       if Process.Tick mod Process.Step = 0 then
+
          case Process.Display is
             when Spinner =>
                Process.Acc := Process.Acc + 1;
                if Process.Acc > Progress_Characters'Last then
                   Process.Acc := 1;
                end if;
+
                Ada.Text_IO.Put (Ada.Text_IO.Standard_Error,
                                 Character'Val (8) &
                                   Progress_Characters (Process.Acc));
                Ada.Text_IO.Flush (Ada.Text_IO.Standard_Error);
+
             when Bar =>
-               Put (Ada.Text_IO.Standard_Error, ".");
-               Flush (Ada.Text_IO.Standard_Error);
+               declare
+                  Count  : constant Natural :=
+                             Process.Finish / Process.Step;
+                  Current : constant Natural :=
+                              Process.Tick / Process.Step;
+                  Filled_Length : constant Natural :=
+                                    Current * Process.Bar_Length / Count;
+                  Empty_Length  : constant Natural :=
+                                    (Count - Current) * Process.Bar_Length
+                                    / Count;
+                  Half_Length   : constant Natural :=
+                                    Process.Bar_Length
+                                      - Filled_Length - Empty_Length;
+                  Filled        : constant String (1 .. Filled_Length) :=
+                                    (others => '=');
+                  Half          : constant String (1 .. Half_Length) :=
+                                    (others => '-');
+                  Empty         : constant String (1 .. Empty_Length) :=
+                                    (others => ' ');
+                  Bar           : constant String := Filled & Half & Empty;
+
+               begin
+                  if Current /= Process.Last_Value then
+                     Put
+                       (Ada.Text_IO.Standard_Error,
+                        Character'Val (13)
+                        & Process.Name.all
+                        & ": ");
+                     Ada.Integer_Text_IO.Put
+                       (Standard_Error,
+                        100 * Current / Count, 3);
+                     Ada.Text_IO.Put
+                       (Standard_Error,
+                        "% [" & Bar & "]");
+                     Process.Last_Value := Current;
+                     Flush (Ada.Text_IO.Standard_Error);
+                  end if;
+               end;
             when Percentage =>
-               if Process.Tick > Process.Finish then
-                  Process.Tick := Process.Finish;
-               end if;
                declare
                   Last_Value : constant Natural :=
                                  Natural (Float (Process.Tick - 1)

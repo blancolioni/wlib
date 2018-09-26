@@ -4,9 +4,12 @@ package WL.Processes is
 
    type Process_Type is tagged limited private;
 
-   procedure Start_Bar (Process   :    out Process_Type;
-                        Name      : String;
-                        Tick_Size : Positive := 1);
+   procedure Start_Bar
+     (Process    :    out Process_Type;
+      Name       : String;
+      Finish     : Positive;
+      Bar_Length : Natural  := 40;
+      Tick_Size  : Positive := 1);
 
    procedure Start_Spinner (Process   :    out Process_Type;
                             Name      : String;
@@ -31,13 +34,15 @@ private
 
    type Process_Type is tagged limited
       record
-         Name    : access String;
-         Display : Display_Type;
-         Prev    : Ada.Calendar.Time;
-         Finish  : Natural  := 0;
-         Tick    : Natural  := 0;
-         Step    : Positive := 1;
-         Acc     : Positive := 1;
+         Name       : access String;
+         Display    : Display_Type;
+         Prev       : Ada.Calendar.Time;
+         Last_Value : Natural  := 0;
+         Bar_Length : Natural  := 0;
+         Finish     : Natural  := 0;
+         Tick       : Natural  := 0;
+         Step       : Positive := 1;
+         Acc        : Positive := 1;
       end record;
 
 end WL.Processes;
