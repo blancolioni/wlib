@@ -13,6 +13,10 @@ package WL.Heaps is
      (Container : Heap)
       return Boolean;
 
+   function Length
+     (Container : Heap)
+      return Natural;
+
    procedure Insert
      (Container : in out Heap;
       Key       : Key_Type;
@@ -55,6 +59,11 @@ private
       record
          Vector : Heap_Vectors.Vector;
       end record;
+
+   function Length
+     (Container : Heap)
+      return Natural
+   is (Natural (Container.Vector.Length));
 
    function First_Element
      (Container : Heap)
