@@ -3,8 +3,20 @@ with Ada.Text_IO;                       use Ada.Text_IO;
 
 package body WL.Processes is
 
+   Send_Escape_Sequences : constant Boolean := True;
+
    Progress_Characters : constant String :=
                            "-\|/";
+
+   type Escape_Sequence is array (Positive range <>) of Natural;
+
+   Cursor_On : constant Escape_Sequence :=
+                 (16#1B#, 16#5B#, 16#3F#, 16#32#, 16#35#, 16#68#);
+   Cursor_Off : constant Escape_Sequence :=
+                  (16#1B#, 16#5B#, 16#3F#, 16#32#, 16#35#, 16#6C#);
+
+   procedure Send_Escape_Sequence
+     (Sequence : Escape_Sequence);
 
    ------------
    -- Finish --
@@ -42,7 +54,28 @@ package body WL.Processes is
 
       Process.Tick := 0;
       New_Line (Ada.Text_IO.Standard_Error);
+      Send_Escape_Sequence (Cursor_On);
+   exception
+      when others =>
+         Send_Escape_Sequence (Cursor_On);
+         raise;
    end Finish;
+
+   --------------------------
+   -- Send_Escape_Sequence --
+   --------------------------
+
+   procedure Send_Escape_Sequence
+     (Sequence : Escape_Sequence)
+   is
+   begin
+      if Send_Escape_Sequences then
+         for Code of Sequence loop
+            Ada.Text_IO.Put (Ada.Text_IO.Standard_Error,
+                             Character'Val (Code));
+         end loop;
+      end if;
+   end Send_Escape_Sequence;
 
    ---------------
    -- Start_Bar --
@@ -58,6 +91,7 @@ package body WL.Processes is
       Spaces : constant String (1 .. Process.Bar_Length) :=
                  (others => ' ');
    begin
+      Send_Escape_Sequence (Cursor_Off);
       Put (Ada.Text_IO.Standard_Error,
            Name & ":      [" & Spaces & "]");
       Flush (Ada.Text_IO.Standard_Error);
@@ -86,6 +120,7 @@ package body WL.Processes is
       Process.Tick    := 0;
       Process.Step    := Tick_Size;
       Process.Prev    := Ada.Calendar.Clock;
+      Send_Escape_Sequence (Cursor_Off);
    end Start_Counter;
 
    ----------------------
@@ -107,6 +142,7 @@ package body WL.Processes is
       Process.Finish  := Finish;
       Process.Step    := Tick_Size;
       Process.Acc     := 1;
+      Send_Escape_Sequence (Cursor_Off);
    end Start_Percentage;
 
    -------------------
@@ -126,6 +162,7 @@ package body WL.Processes is
       Process.Tick    := 0;
       Process.Step    := Tick_Size;
       Process.Acc     := 1;
+      Send_Escape_Sequence (Cursor_Off);
    end Start_Spinner;
 
    ----------
@@ -155,18 +192,21 @@ package body WL.Processes is
 
             when Bar =>
                declare
-                  Count  : constant Natural :=
-                             Process.Finish / Process.Step;
-                  Current : constant Natural :=
-                              Process.Tick / Process.Step;
+                  Count    : constant Natural :=
+                               Process.Finish / Process.Step;
+                  Current  : constant Natural :=
+                               Process.Tick / Process.Step;
+                  Partial  : constant Natural :=
+                               Process.Tick mod Process.Step;
                   Filled_Length : constant Natural :=
-                                    Current * Process.Bar_Length / Count;
-                  Empty_Length  : constant Natural :=
-                                    (Count - Current) * Process.Bar_Length
-                                    / Count;
+                                    Current * Process.Bar_Length
+                                      / Count;
                   Half_Length   : constant Natural :=
+                                    (if Partial > Process.Step / 2
+                                     then 1 else 0);
+                  Empty_Length  : constant Natural :=
                                     Process.Bar_Length
-                                      - Filled_Length - Empty_Length;
+                                      - Filled_Length - Half_Length;
                   Filled        : constant String (1 .. Filled_Length) :=
                                     (others => '=');
                   Half          : constant String (1 .. Half_Length) :=
@@ -176,7 +216,7 @@ package body WL.Processes is
                   Bar           : constant String := Filled & Half & Empty;
 
                begin
-                  if Current /= Process.Last_Value then
+                  if Current * 2 + Half_Length /= Process.Last_Value then
                      Put
                        (Ada.Text_IO.Standard_Error,
                         Character'Val (13)
@@ -188,7 +228,7 @@ package body WL.Processes is
                      Ada.Text_IO.Put
                        (Standard_Error,
                         "% [" & Bar & "]");
-                     Process.Last_Value := Current;
+                     Process.Last_Value := Current * 2 + Half_Length;
                      Flush (Ada.Text_IO.Standard_Error);
                   end if;
                end;
@@ -225,6 +265,10 @@ package body WL.Processes is
                end;
          end case;
       end if;
+   exception
+      when others =>
+         Send_Escape_Sequence (Cursor_On);
+         raise;
    end Tick;
 
 end WL.Processes;
