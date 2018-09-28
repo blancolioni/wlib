@@ -141,9 +141,24 @@ package body WL.Localisation is
                       Ada.Strings.Fixed.Index (Line, ",");
          begin
             if Index > 0 then
-               Local_Map.Insert
-                 (Line (Line'First .. Index - 1),
-                  Line (Index + 1 .. Line'Last));
+               declare
+                  Key : constant String :=
+                          Line (Line'First .. Index - 1);
+                  Value : constant String :=
+                            Line (Index + 1 .. Line'Last);
+               begin
+                  if Local_Map.Contains (Key) then
+                     Ada.Text_IO.Put_Line
+                       (Ada.Text_IO.Standard_Error,
+                        "duplicate localisation entries found for '"
+                        & Key & "'"
+                        & (if Value = Local_Map.Element (Value)
+                          then " with identical values"
+                          else " with different values"));
+                  else
+                     Local_Map.Insert (Key, Value);
+                  end if;
+               end;
             end if;
          end;
       end loop;
