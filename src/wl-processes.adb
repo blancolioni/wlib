@@ -196,13 +196,15 @@ package body WL.Processes is
                                Process.Finish / Process.Step;
                   Current  : constant Natural :=
                                Process.Tick / Process.Step;
+                  Bar_Step : constant Natural :=
+                               Count / Process.Bar_Length;
                   Partial  : constant Natural :=
-                               Process.Tick mod Process.Step;
+                               Process.Tick mod Bar_Step;
                   Filled_Length : constant Natural :=
                                     Current * Process.Bar_Length
                                       / Count;
                   Half_Length   : constant Natural :=
-                                    (if Partial > Process.Step / 2
+                                    (if Partial > Bar_Step / 2
                                      then 1 else 0);
                   Empty_Length  : constant Natural :=
                                     Process.Bar_Length
