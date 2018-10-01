@@ -39,7 +39,13 @@ package body WL.Processes is
                  (Ada.Text_IO.Standard_Error,
                   Character'Val (13)
                   & Process.Name.all
-                  & ": 100% [" & Final & "]");
+                  & ": ");
+               if Process.Percent then
+                  Put (Standard_Error, "100% ");
+               end if;
+               Put
+                 (Ada.Text_IO.Standard_Error,
+                  "[" & Final & "]");
             end;
          when Percentage =>
             Put (Ada.Text_IO.Standard_Error,
@@ -82,11 +88,12 @@ package body WL.Processes is
    ---------------
 
    procedure Start_Bar
-     (Process    :    out Process_Type;
-      Name       : String;
-      Finish     : Positive;
-      Bar_Length : Natural  := 40;
-      Tick_Size  : Positive := 1)
+     (Process         :    out Process_Type;
+      Name            : String;
+      Finish          : Positive;
+      With_Percentage : Boolean := False;
+      Bar_Length      : Natural  := 40;
+      Tick_Size       : Positive := 1)
    is
       Spaces : constant String (1 .. Process.Bar_Length) :=
                  (others => ' ');
@@ -97,6 +104,7 @@ package body WL.Processes is
       Flush (Ada.Text_IO.Standard_Error);
       Process.Name    := new String'(Name);
       Process.Display := Bar;
+      Process.Percent := With_Percentage;
       Process.Tick    := 0;
       Process.Finish  := Finish;
       Process.Step    := Tick_Size;
@@ -224,12 +232,17 @@ package body WL.Processes is
                         Character'Val (13)
                         & Process.Name.all
                         & ": ");
-                     Ada.Integer_Text_IO.Put
-                       (Standard_Error,
-                        100 * Current / Count, 3);
+                     if Process.Percent then
+                        Ada.Integer_Text_IO.Put
+                          (Standard_Error,
+                           100 * Current / Count, 3);
+                        Ada.Text_IO.Put
+                          (Standard_Error,
+                           "% ");
+                     end if;
                      Ada.Text_IO.Put
                        (Standard_Error,
-                        "% [" & Bar & "]");
+                        "[" & Bar & "]");
                      Process.Last_Value := Current * 2 + Half_Length;
                      Flush (Ada.Text_IO.Standard_Error);
                   end if;
