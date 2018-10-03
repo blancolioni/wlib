@@ -1,5 +1,6 @@
 generic
    type Real is digits <>;
+   Decimal_Places : Natural := 0;
 package WL.Generic_Quantities is
 
    subtype Unit_Real is Real range 0.0 .. 1.0;

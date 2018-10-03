@@ -4,9 +4,13 @@ package body WL.Generic_Quantities is
 
    Local_Random_Unit_Real : Random_Unit_Real;
 
-   function Significant_Digits_Image (Item : Real;
-                                      Sig  : Positive)
-                                     return String;
+   function Significant_Digits_Image
+     (Item : Real;
+      Sig  : Positive)
+      return String;
+
+   Real_To_Quantity_Scale : constant Real := 10.0 ** Decimal_Places;
+   Quantity_To_Real_Scale : constant Real := 1.0 / Real_To_Quantity_Scale;
 
    ------------
    -- Around --
@@ -35,7 +39,7 @@ package body WL.Generic_Quantities is
               1.0 - Inflection + Local_Random_Unit_Real.all * 2.0 * Factor;
       end case;
 
-      return Quantity_Type (Real (X) * Factor);
+      return To_Quantity (To_Real (X) * Factor);
    end Around;
 
    -----------
@@ -76,7 +80,7 @@ package body WL.Generic_Quantities is
       return Quantity_Type
    is
    begin
-      return Quantity_Type (Real (X) * Factor);
+      return To_Quantity (To_Real (X) * Factor);
    end Scale;
 
    ----------------
@@ -113,17 +117,32 @@ package body WL.Generic_Quantities is
       Factors    : constant array (1 .. 3) of Real :=
                      (1.0E9, 1.0E6, 1.0E3);
       Extensions : constant String := "GMK";
+      R          : constant Real := To_Real (Item);
    begin
-      for I in Factors'Range loop
-         if Real (Item) > Factors (I) then
-            return Significant_Digits_Image (Real (Item) / Factors (I), 3) &
-            (1 => Extensions (I));
-         end if;
-      end loop;
 
-      return Ada.Strings.Fixed.Trim
-        (Quantity_Type'Image (Item), Ada.Strings.Left);
+      if R = 0.0 then
+         return "0";
+      elsif R < 1.0 then
+         declare
+            Img : constant String :=
+                    Natural'Image
+                      (Natural
+                         (Real_To_Quantity_Scale * R)
+                       + Natural (Real_To_Quantity_Scale * 10.0));
+         begin
+            return "0." & Img (Img'First + 3 .. Img'Last);
+         end;
+      else
+         for I in Factors'Range loop
+            if R > Factors (I) then
+               return Significant_Digits_Image (R / Factors (I), 3) &
+               (1 => Extensions (I));
+            end if;
+         end loop;
 
+         return Ada.Strings.Fixed.Trim
+           (Natural'Image (Natural (R)), Ada.Strings.Left);
+      end if;
    end Show;
 
    ------------------------------
@@ -189,7 +208,7 @@ package body WL.Generic_Quantities is
 
    function To_Natural (Value : Quantity_Type) return Natural is
    begin
-      return Natural (Value);
+      return Natural (To_Real (Value));
    end To_Natural;
 
    -----------------
@@ -198,7 +217,7 @@ package body WL.Generic_Quantities is
 
    function To_Quantity (Value : Real) return Quantity_Type is
    begin
-      return Quantity_Type (Real'Floor (Value));
+      return Quantity_Type (Real'Floor (Value * Real_To_Quantity_Scale));
    end To_Quantity;
 
    --------------
@@ -207,7 +226,7 @@ package body WL.Generic_Quantities is
 
    function To_Real (Value : Quantity_Type) return Real is
    begin
-      return Real (Value);
+      return Real (Value) * Quantity_To_Real_Scale;
    end To_Real;
 
    ----------
@@ -216,7 +235,7 @@ package body WL.Generic_Quantities is
 
    function Unit return Quantity_Type is
    begin
-      return 1;
+      return To_Quantity (1.0);
    end Unit;
 
    -----------
@@ -224,23 +243,22 @@ package body WL.Generic_Quantities is
    -----------
 
    function Value (Image : String) return Quantity_Type is
+      R : Real;
    begin
       if Image = "" then
-         return Zero;
+         R := 0.0;
       elsif Image (Image'First) = '~' then
          return Around (Value (Image (Image'First + 1 .. Image'Last)));
       elsif Image (Image'Last) = 'K' then
-         return Quantity_Type'Value (Image (Image'First .. Image'Last - 1))
-           * 1E3;
+         R := Real'Value (Image (Image'First .. Image'Last - 1)) * 1.0E3;
       elsif Image (Image'Last) = 'M' then
-         return Quantity_Type'Value (Image (Image'First .. Image'Last - 1))
-           * 1E6;
+         R := Real'Value (Image (Image'First .. Image'Last - 1)) * 1.0E6;
       elsif Image (Image'Last) = 'G' then
-         return Quantity_Type'Value (Image (Image'First .. Image'Last - 1))
-           * 1E9;
+         R := Real'Value (Image (Image'First .. Image'Last - 1)) * 1.0E9;
       else
-         return Quantity_Type'Value (Image);
+         R := Real'Value (Image);
       end if;
+      return To_Quantity (R);
    end Value;
 
    ----------
