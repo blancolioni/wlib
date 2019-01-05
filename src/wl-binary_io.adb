@@ -101,6 +101,7 @@ package body WL.Binary_IO is
    procedure Flush
      (File : File_Type)
    is
+      use Ada.Streams;
       use Ada.Streams.Stream_IO;
       Stream : Ada.Streams.Stream_IO.File_Type;
       Path   : constant String :=
@@ -112,7 +113,7 @@ package body WL.Binary_IO is
          Create (Stream, Out_File, Path);
       end if;
 
-      Write (Stream, File.Data (0 .. File.Size));
+      Write (Stream, File.Data (0 .. File.Size - 1));
 
       Close (Stream);
    end Flush;
