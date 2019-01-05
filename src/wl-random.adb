@@ -22,7 +22,6 @@
 ------------------------------------------------------------------------------
 
 with Ada.Numerics.Discrete_Random;
-with Calendar;
 
 package body WL.Random is
 
@@ -72,13 +71,8 @@ package body WL.Random is
    ---------------
 
    procedure Randomise is
-      use Calendar;
-      Seed : Integer;
-      Now  : Calendar.Time;
    begin
-      Now := Calendar.Clock;
-      Seed := Integer (Seconds (Now)) * 10;
-      My_Random.Reset (G, Seed);
+      My_Random.Reset (G);
    end Randomise;
 
    -------------------
