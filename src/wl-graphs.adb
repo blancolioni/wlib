@@ -733,6 +733,7 @@ package body WL.Graphs is
          Result : Path;
          It     : Index_Type := Finish;
       begin
+         Result.Cost := Visited (It).Cost_So_Far;
          while Visited (It).Came_From /= Sentinel loop
             if Result.List.Is_Empty then
                Result.List.Append (It);
@@ -812,7 +813,7 @@ package body WL.Graphs is
    -- Vertex_Count --
    ------------------
 
-   function Vertex_Count (P : Path) return Index_Type is
+   function Vertex_Count (P : Path) return Extended_Index is
    begin
       return Extended_Index (P.List.Length);
    end Vertex_Count;

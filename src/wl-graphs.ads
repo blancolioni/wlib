@@ -159,7 +159,7 @@ package WL.Graphs is
    type Path is private;
 
    function Cost (P : Path) return Cost_Type;
-   function Vertex_Count (P : Path) return Index_Type;
+   function Vertex_Count (P : Path) return Extended_Index;
    function Next (Container : Graph;
                   P         : Path)
                   return Vertex_Type
