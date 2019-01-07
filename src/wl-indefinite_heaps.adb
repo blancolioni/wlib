@@ -37,6 +37,15 @@ package body WL.Indefinite_Heaps is
       return Natural
    is (Node / 2);
 
+   -----------
+   -- Clear --
+   -----------
+
+   procedure Clear (Container : in out Heap) is
+   begin
+      Container.Vector.Clear;
+   end Clear;
+
    ------------------
    -- Delete_First --
    ------------------

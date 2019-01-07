@@ -14,6 +14,8 @@ package WL.Indefinite_Heaps is
      (Container : Heap)
       return Boolean;
 
+   procedure Clear (Container : in out Heap);
+
    procedure Insert
      (Container : in out Heap;
       Key       : Key_Type;
