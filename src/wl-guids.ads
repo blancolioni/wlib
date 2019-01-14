@@ -1,10 +1,16 @@
+with Ada.Containers;
+
 package WL.Guids is
 
    type Guid is private;
 
+   Null_Guid : constant Guid;
+
    function New_Guid return Guid;
 
    function To_String (Id : Guid) return String;
+
+   function Hash (Id : Guid) return Ada.Containers.Hash_Type;
 
 private
 
@@ -12,11 +18,8 @@ private
 
    Element_Count : constant := 4;
 
-   type Element_Array is array (1 .. Element_Count) of Element;
+   type Guid is array (1 .. Element_Count) of Element;
 
-   type Guid is
-      record
-         Es : Element_Array;
-      end record;
+   Null_Guid : constant Guid := (others => 0);
 
 end WL.Guids;
