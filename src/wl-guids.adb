@@ -11,6 +11,19 @@ package body WL.Guids is
 
    function To_Hex (E : Element) return Element_String;
 
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Id : Guid) return Ada.Containers.Hash_Type is
+      H : Element := 0;
+   begin
+      for E of Id loop
+         H := H xor E;
+      end loop;
+      return Ada.Containers.Hash_Type (H);
+   end Hash;
+
    --------------
    -- New_Guid --
    --------------
@@ -18,7 +31,7 @@ package body WL.Guids is
    function New_Guid return Guid is
    begin
       return G : Guid do
-         for E of G.Es loop
+         for E of G loop
             E := Element_Random.Random (Gen);
          end loop;
       end return;
@@ -45,10 +58,10 @@ package body WL.Guids is
    ---------------
 
    function To_String (Id : Guid) return String is
-      Images : array (Id.Es'Range) of Element_String;
+      Images : array (Id'Range) of Element_String;
    begin
       for I in Images'Range loop
-         Images (I) := To_Hex (Id.Es (I));
+         Images (I) := To_Hex (Id (I));
       end loop;
       return Images (1) & "-" & Images (2) (1 .. 4)
         & "-" & Images (2) (5 .. 8) & "-"
