@@ -213,6 +213,7 @@ package body WL.Processes is
                                       / Count;
                   Half_Length   : constant Natural :=
                                     (if Partial > Bar_Step / 2
+                                     and then Current < Count
                                      then 1 else 0);
                   Empty_Length  : constant Natural :=
                                     Process.Bar_Length
