@@ -201,8 +201,16 @@ package body WL.Command_Line is
                     & ": invalid setting";
                end if;
 
-               Ada.Text_IO.Put_Line ("option: " & Name & " = " & Value);
-               Default_Values.Insert (Name, Value);
+               if Default_Values.Contains (Name) then
+                  Ada.Text_IO.Put_Line
+                    (Ada.Text_IO.Standard_Error,
+                     "warning: option '" & Name & "' appears twice with "
+                     & (if Value = Default_Values.Element (Name)
+                       then "the same value"
+                       else "different values"));
+               else
+                  Default_Values.Insert (Name, Value);
+               end if;
             end if;
          end;
       end loop;
