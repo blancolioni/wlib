@@ -15,4 +15,7 @@ package WL.Guids.Maps is
 
    subtype Map is Guid_Maps.Map;
 
+   function Element (Position : Guid_Maps.Cursor) return Element_Type
+                     renames Guid_Maps.Element;
+
 end WL.Guids.Maps;
