@@ -62,8 +62,6 @@ private
 
    type Quantity_Type is range 0 .. 2 ** 63 - 1;
 
-   pragma Import (Intrinsic, "*");
-   pragma Import (Intrinsic, "/");
    pragma Import (Intrinsic, "mod");
    pragma Import (Intrinsic, "+");
    pragma Import (Intrinsic, "-");
