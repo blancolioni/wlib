@@ -12,6 +12,30 @@ package body WL.Generic_Quantities is
    Real_To_Quantity_Scale : constant Real := 10.0 ** Decimal_Places;
    Quantity_To_Real_Scale : constant Real := 1.0 / Real_To_Quantity_Scale;
 
+   ---------
+   -- "*" --
+   ---------
+
+   overriding function "*"
+     (Left, Right : Quantity_Type)
+      return Quantity_Type
+   is
+   begin
+      return To_Quantity (To_Real (Left) * To_Real (Right));
+   end "*";
+
+   ---------
+   -- "/" --
+   ---------
+
+   overriding function "/"
+     (Left, Right : Quantity_Type)
+      return Quantity_Type
+   is
+   begin
+      return To_Quantity (To_Real (Left) / To_Real (Right));
+   end "/";
+
    ------------
    -- Around --
    ------------
