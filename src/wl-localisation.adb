@@ -1,3 +1,5 @@
+with Ada.Characters.Handling;
+with Ada.Directories;
 with Ada.Strings.Fixed;
 with Ada.Text_IO;
 
@@ -10,6 +12,86 @@ package body WL.Localisation is
 
    Local_Map : Text_Maps.Map;
 
+   Default_Language : constant Language_Type := ("en", "  ");
+
+   function To_Key
+     (Language : Language_Type;
+      Tag      : String)
+      return String
+   is (String (Language.Language)
+       & (if Language.Country /= "  "
+          then "-" & String (Language.Country)
+          else "")
+       & "--["
+       & Tag
+       & "]");
+
+   function Get_Local_Text
+     (Key   : String;
+      Arg_1 : String;
+      Arg_2 : String;
+      Arg_3 : String;
+      Arg_4 : String)
+      return String;
+
+   --------------------
+   -- Get_Local_Text --
+   --------------------
+
+   function Get_Local_Text
+     (Key   : String;
+      Arg_1 : String;
+      Arg_2 : String;
+      Arg_3 : String;
+      Arg_4 : String)
+      return String
+   is
+
+      subtype Argument_Index is Character range '1' .. '4';
+
+      function Sub (S : String) return String;
+
+      ---------
+      -- Sub --
+      ---------
+
+      function Sub (S : String) return String is
+         Index : constant Natural :=
+                   Ada.Strings.Fixed.Index (S, "{");
+      begin
+         if Index > 0
+           and then Index < S'Last - 1
+           and then S (Index + 1) in Argument_Index
+           and then S (Index + 2) = '}'
+         then
+            declare
+               Front : constant String :=
+                         (case Argument_Index (S (Index + 1)) is
+                             when '1' => Arg_1,
+                             when '2' => Arg_2,
+                             when '3' => Arg_3,
+                             when '4' => Arg_4);
+               Rest  : constant String := Sub (S (Index + 3 .. S'Last));
+            begin
+               return S (S'First .. Index - 1) & Front & Rest;
+            end;
+         else
+            return S;
+         end if;
+      end Sub;
+
+   begin
+      if Local_Map.Contains (Key) then
+         return Sub (Local_Map.Element (Key));
+      else
+         return Key
+           & (if Arg_1 = "" then "" else " " & Arg_1)
+           & (if Arg_2 = "" then "" else " " & Arg_2)
+           & (if Arg_3 = "" then "" else " " & Arg_3)
+           & (if Arg_4 = "" then "" else " " & Arg_4);
+      end if;
+   end Get_Local_Text;
+
    --------------------
    -- Has_Local_Text --
    --------------------
@@ -19,7 +101,20 @@ package body WL.Localisation is
       return Boolean
    is
    begin
-      return Local_Map.Contains (Tag);
+      return Has_Local_Text (Default_Language, Tag);
+   end Has_Local_Text;
+
+   --------------------
+   -- Has_Local_Text --
+   --------------------
+
+   function Has_Local_Text
+     (Language     : Language_Type;
+      Tag          : String)
+      return Boolean
+   is
+   begin
+      return Local_Map.Contains (To_Key (Language, Tag));
    end Has_Local_Text;
 
    ------------------
@@ -75,53 +170,68 @@ package body WL.Localisation is
       Arg_4 : String := "")
       return String
    is
+   begin
+      return Local_Text (Default_Language, Tag, Arg_1, Arg_2, Arg_3, Arg_4);
+   end Local_Text;
 
-      subtype Argument_Index is Character range '1' .. '4';
+   ----------------
+   -- Local_Text --
+   ----------------
 
-      function Sub (S : String) return String;
+   function Local_Text
+     (Language : Language_Type;
+      Tag      : String;
+      Arg_1    : String := "";
+      Arg_2    : String := "";
+      Arg_3    : String := "";
+      Arg_4    : String := "")
+      return String
+   is
+   begin
+      return Get_Local_Text (To_Key (Language, Tag),
+                             Arg_1, Arg_2, Arg_3, Arg_4);
+   end Local_Text;
 
-      ---------
-      -- Sub --
-      ---------
+   -------------------------------
+   -- Read_Language_Directories --
+   -------------------------------
 
-      function Sub (S : String) return String is
-         Index : constant Natural :=
-                   Ada.Strings.Fixed.Index (S, "{");
+   procedure Read_Language_Directories
+     (Path     : String)
+   is
+      use Ada.Directories;
+
+      procedure Process (Item : Directory_Entry_Type);
+
+      -------------
+      -- Process --
+      -------------
+
+      procedure Process (Item : Directory_Entry_Type) is
+         Name : constant String := Simple_Name (Item);
       begin
-         if Index > 0
-           and then Index < S'Last - 1
-           and then S (Index + 1) in Argument_Index
-           and then S (Index + 2) = '}'
-         then
+         if Name /= "." and then Name /= ".." then
             declare
-               Front : constant String :=
-                         (case Argument_Index (S (Index + 1)) is
-                             when '1' => Arg_1,
-                             when '2' => Arg_2,
-                             when '3' => Arg_3,
-                             when '4' => Arg_4);
-               Rest : constant String := Sub (S (Index + 3 .. S'Last));
+               Language : constant Language_Type :=
+                            To_Language (Name);
             begin
-               return S (S'First .. Index - 1) & Front & Rest;
+               if Is_Valid (Language) then
+                  Ada.Text_IO.Put_Line
+                    ("available language: " & Name);
+                  Read_Localisation_Directory
+                    (Language, Full_Name (Item));
+               end if;
             end;
-         else
-            return S;
          end if;
-      end Sub;
+      end Process;
 
    begin
-      if Tag = "" then
-         return "";
-      elsif Local_Map.Contains (Tag) then
-         return Sub (Local_Map.Element (Tag));
-      else
-         return "[" & Tag & "]"
-           & (if Arg_1 = "" then "" else " " & Arg_1)
-           & (if Arg_2 = "" then "" else " " & Arg_2)
-           & (if Arg_3 = "" then "" else " " & Arg_3)
-           & (if Arg_4 = "" then "" else " " & Arg_4);
-      end if;
-   end Local_Text;
+      Search
+        (Directory => Path,
+         Pattern   => "*",
+         Filter    => (Directory => True, others => False),
+         Process   => Process'Access);
+   end Read_Language_Directories;
 
    -----------------------
    -- Read_Localisation --
@@ -129,6 +239,47 @@ package body WL.Localisation is
 
    procedure Read_Localisation
      (Path : String)
+   is
+   begin
+      Read_Localisation_File (Default_Language, Path);
+   end Read_Localisation;
+
+   ---------------------------------
+   -- Read_Localisation_Directory --
+   ---------------------------------
+
+   procedure Read_Localisation_Directory
+     (Language : Language_Type;
+      Path     : String)
+   is
+      use Ada.Directories;
+
+      procedure Process (Item : Directory_Entry_Type);
+
+      -------------
+      -- Process --
+      -------------
+
+      procedure Process (Item : Directory_Entry_Type) is
+      begin
+         Read_Localisation_File (Language, Full_Name (Item));
+      end Process;
+
+   begin
+      Search
+        (Directory => Path,
+         Pattern   => "*",
+         Filter    => (Ordinary_File => True, others => False),
+         Process   => Process'Access);
+   end Read_Localisation_Directory;
+
+   -----------------------
+   -- Read_Localisation --
+   -----------------------
+
+   procedure Read_Localisation_File
+     (Language : Language_Type;
+      Path     : String)
    is
       use Ada.Text_IO;
       File : File_Type;
@@ -143,7 +294,7 @@ package body WL.Localisation is
             if Index > 0 then
                declare
                   Key : constant String :=
-                          Line (Line'First .. Index - 1);
+                          To_Key (Language, Line (Line'First .. Index - 1));
                   Value : constant String :=
                             Line (Index + 1 .. Line'Last);
                begin
@@ -162,19 +313,36 @@ package body WL.Localisation is
             end if;
          end;
       end loop;
-   end Read_Localisation;
+      Close (File);
+   end Read_Localisation_File;
 
-   -----------------------
-   -- Read_Localisation --
-   -----------------------
+   -----------------
+   -- To_Language --
+   -----------------
 
-   procedure Read_Localisation
-     (Language : out Language_Type;
-      Path     : String)
+   function To_Language
+     (Code : String)
+      return Language_Type
    is
+      use Ada.Characters.Handling;
    begin
-      Language := "en-uk";
-      Read_Localisation (Path);
-   end Read_Localisation;
+      if (Code'Length /= 2 and then Code'Length /= 5)
+        or else (Code'Length = 5 and then Code (Code'First + 2) /= '-')
+        or else not Is_Letter (Code (Code'First))
+        or else not Is_Letter (Code (Code'First + 1))
+        or else (Code'Length = 5 and then
+                   (not Is_Letter (Code (Code'First + 3))
+                    or else not Is_Letter (Code (Code'First + 4))))
+      then
+         return No_Language;
+      end if;
+
+      if Code'Length = 2 then
+         return (ISO_Language (Code), "  ");
+      else
+         return (ISO_Language (Code (Code'First .. Code'First + 1)),
+                 ISO_Country (Code (Code'First + 3 .. Code'First + 4)));
+      end if;
+   end To_Language;
 
 end WL.Localisation;

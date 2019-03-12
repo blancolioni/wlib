@@ -21,6 +21,14 @@ package WL.Localisation is
 
    type Language_Type is private;
 
+   function To_Language
+     (Code : String)
+      return Language_Type;
+
+   function Is_Valid
+     (Language : Language_Type)
+      return Boolean;
+
    function Local_Text
      (Language : Language_Type;
       Tag      : String;
@@ -35,9 +43,20 @@ package WL.Localisation is
       Tag          : String)
       return Boolean;
 
-   procedure Read_Localisation
-     (Language : out Language_Type;
+   procedure Read_Localisation_File
+     (Language : Language_Type;
       Path     : String);
+
+   procedure Read_Localisation_Directory
+     (Language : Language_Type;
+      Path     : String);
+
+   procedure Read_Language_Directories
+     (Path     : String);
+   --  for each directory contained in Path: treat the name of the
+   --  directory as a language code, and call
+   --  Read_Localisation_Directory (<directory name as language>,
+   --                               Path/directory-name)
 
    type Localisation_Interface is limited interface;
 
@@ -64,22 +83,20 @@ package WL.Localisation is
 
 private
 
-   type Language_Type is new String (1 .. 5);
+   type ISO_Language is new String (1 .. 2);
+   type ISO_Country is new String (1 .. 2);
 
-   function Local_Text
-     (Language : Language_Type;
-      Tag      : String;
-      Arg_1    : String := "";
-      Arg_2    : String := "";
-      Arg_3    : String := "";
-      Arg_4    : String := "")
-      return String
-   is (Local_Text (Tag, Arg_1, Arg_2, Arg_3, Arg_4));
+   type Language_Type is
+      record
+         Language : ISO_Language := "  ";
+         Country  : ISO_Country  := "  ";
+      end record;
 
-   function Has_Local_Text
-     (Language     : Language_Type;
-      Tag          : String)
+   No_Language : constant Language_Type := ("  ", "  ");
+
+   function Is_Valid
+     (Language : Language_Type)
       return Boolean
-   is (Has_Local_Text (Tag));
+   is (Language /= No_Language);
 
 end WL.Localisation;
