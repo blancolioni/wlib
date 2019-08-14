@@ -627,6 +627,8 @@ package body WL.Graphs is
       return Path
    is
 
+      pragma Warnings (Off);
+
       function Passable
         (From, To : Vertex_Type)
          return Boolean
