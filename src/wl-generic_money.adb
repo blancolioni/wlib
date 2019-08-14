@@ -1,6 +1,11 @@
 with Ada.Strings.Fixed;
 
+with WL.Generic_Real_Images;
+
 package body WL.Generic_Money is
+
+   package Real_Images is
+     new WL.Generic_Real_Images (Real);
 
    Local_Currency_Symbol       : String := "$   ";
    Local_Digit_Grouping_Symbol : String := ",   ";
@@ -99,8 +104,12 @@ package body WL.Generic_Money is
       return Quantities.Quantity_Type
    is
    begin
-      return Quantities.To_Quantity
-        (Real (Total_Cash / Money_Type (Price)));
+      if Total_Cash > Zero then
+         return Quantities.To_Quantity
+           (Real (Total_Cash / Money_Type (Price)));
+      else
+         return Quantities.Zero;
+      end if;
    end Get_Quantity;
 
    -----------
@@ -285,14 +294,8 @@ package body WL.Generic_Money is
    begin
       if Exact or else Real_Value < 10_000.0 then
          return Show_Exact (Price, True);
-      elsif Real_Value < 1.0E6 then
-         return Show_Exact (Price / 1e3, False) & "K";
-      elsif Real_Value < 1.0E9 then
-         return Show_Exact (Price / 1e6, False) & "M";
-      elsif Real_Value < 1.0E12 then
-         return Show_Exact (Price / 1e9, False) & "B";
       else
-         return Show_Exact (Price / 1e12, False) & "T";
+         return Currency_Symbol & Real_Images.Approximate_Image (Real_Value);
       end if;
    end Show;
 
