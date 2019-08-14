@@ -75,6 +75,15 @@ package body WL.Random is
       My_Random.Reset (G);
    end Randomise;
 
+   -----------
+   -- Reset --
+   -----------
+
+   procedure Reset (Initiator : Integer) is
+   begin
+      My_Random.Reset (G, Initiator);
+   end Reset;
+
    -------------------
    -- Restore_State --
    -------------------

@@ -31,6 +31,7 @@ package WL.Random is
    function Random_Number (Min, Max : Integer) return Integer;
 
    procedure Randomise;
+   procedure Reset (Initiator : Integer);
 
    function Current_State return String;
    procedure Restore_State (State : String);
