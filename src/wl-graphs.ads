@@ -83,6 +83,12 @@ package WL.Graphs is
         procedure (To : Vertex_Type;
                    Cost : Cost_Type));
 
+   function Edge
+     (Container : Graph;
+      From      : Vertex_Type;
+      Index     : Count_Type)
+      return Vertex_Type;
+
    function Breadth_First_Search
      (Container : Graph;
       Start     : Vertex_Type;
@@ -115,6 +121,13 @@ package WL.Graphs is
      (Container : Graph;
       Start     : Index_Type;
       Max       : Cost_Type;
+      Result    : out Sub_Graph);
+
+   procedure Breadth_First_Search
+     (Container : Graph;
+      Start     : Index_Type;
+      Test      : not null access
+        function (Vertex : Vertex_Type) return Boolean;
       Result    : out Sub_Graph);
 
    procedure Connected_Sub_Graph

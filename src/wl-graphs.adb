@@ -212,6 +212,47 @@ package body WL.Graphs is
 
    end Breadth_First_Search;
 
+   --------------------------
+   -- Breadth_First_Search --
+   --------------------------
+
+   procedure Breadth_First_Search
+     (Container : Graph;
+      Start     : Index_Type;
+      Test      : not null access
+        function (Vertex : Vertex_Type) return Boolean;
+      Result    : out Sub_Graph)
+   is
+      package Queue_Of_Indices is
+        new Ada.Containers.Doubly_Linked_Lists (Index_Type);
+      Queue : Queue_Of_Indices.List;
+   begin
+      Container.Create (Result);
+
+      if not Test (Container.Vertex (Start)) then
+         return;
+      end if;
+
+      Queue.Append (Start);
+
+      while not Queue.Is_Empty loop
+         declare
+            Ix   : constant Index_Type := Queue.First_Element;
+         begin
+            Queue.Delete_First;
+            if not Contains (Result, Ix) then
+               Append (Result, Ix);
+               for Edge of Container.Vertices.Element (Ix).Edges loop
+                  if Test (Container.Vertex (Edge.To)) then
+                     Queue.Append (Edge.To);
+                  end if;
+               end loop;
+            end if;
+         end;
+      end loop;
+
+   end Breadth_First_Search;
+
    -------------
    -- Connect --
    -------------
@@ -380,6 +421,26 @@ package body WL.Graphs is
       end loop;
 
    end Depth_First_Search;
+
+   ----------
+   -- Edge --
+   ----------
+
+   function Edge
+     (Container : Graph;
+      From      : Vertex_Type;
+      Index     : Count_Type)
+      return Vertex_Type
+   is
+      Edges : Edge_Lists.List renames
+        Container.Vertices.Element (Index_Of (From)).Edges;
+      Position : Edge_Lists.Cursor := Edges.First;
+   begin
+      for I in 2 .. Index loop
+         Edge_Lists.Next (Position);
+      end loop;
+      return Container.Vs (Edge_Lists.Element (Position).To);
+   end Edge;
 
    ---------------
    -- Edge_Cost --
