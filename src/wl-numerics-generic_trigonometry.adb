@@ -26,6 +26,24 @@ package body WL.Numerics.Generic_Trigonometry is
    end "-";
 
    ------------
+   -- Arccos --
+   ------------
+
+   function Arccos (Y : Signed_Unit_Real) return Angle is
+   begin
+      return From_Radians (Elementary_Functions.Arccos (Y));
+   end Arccos;
+
+   ------------
+   -- Arcsin --
+   ------------
+
+   function Arcsin (Y : Signed_Unit_Real) return Angle is
+   begin
+      return From_Radians (Elementary_Functions.Arcsin (Y));
+   end Arcsin;
+
+   ------------
    -- Arctan --
    ------------
 

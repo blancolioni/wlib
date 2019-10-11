@@ -17,6 +17,9 @@ package WL.Numerics.Generic_Trigonometry is
    function Cos (Theta : Angle) return Signed_Unit_Real;
    function Tan (Theta : Angle) return Real;
 
+   function Arcsin (Y : Signed_Unit_Real) return Angle;
+   function Arccos (Y : Signed_Unit_Real) return Angle;
+
    function Arctan (Y : Real;
                     X : Real := 1.0)
                     return Angle;
