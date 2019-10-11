@@ -109,7 +109,7 @@ package body WL.Processes is
       Process.Finish  := Finish;
       Process.Step    := Tick_Size;
       Process.Acc     := 1;
-      Process.Bar_Length := Bar_Length;
+      Process.Bar_Length := Natural'Min (Bar_Length, Finish);
    end Start_Bar;
 
    -------------------
