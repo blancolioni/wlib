@@ -30,7 +30,8 @@ package body WL.Indefinite_Heaps is
    function Right_Child
      (Node : Positive)
       return Positive
-   is (Node * 2 + 1);
+   is (Node * 2 + 1)
+     with Unreferenced;
 
    function Parent
      (Node : Positive)
