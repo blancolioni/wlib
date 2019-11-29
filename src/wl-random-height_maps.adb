@@ -56,7 +56,7 @@ package body WL.Random.Height_Maps is
       Frequencies     : Frequency_Map)
       return Height_Table_Type
    is
-      Local : Frequency_Map := Frequencies;
+      Local : array (Frequencies'Range) of Long_Float;
       Sum   : Natural := 0;
    begin
 
@@ -65,51 +65,53 @@ package body WL.Random.Height_Maps is
       end loop;
 
       declare
-         Total      : Natural := 0;
+         Total : Natural := 0;
+         Cum   : Natural := 0;
       begin
-         for F of Local loop
+         for F of Frequencies loop
             Total := Total + F;
          end loop;
 
-         for F of Local loop
-            F := F * Sum / Total;
+         for I in Local'Range loop
+            Local (I) := Long_Float (Cum) / Long_Float (Total);
+            Cum := Cum + Frequencies (I);
          end loop;
-         for I in Local'First + 1 .. Local'Last loop
-            Local (I) := Local (I) + Local (I - 1);
-         end loop;
+
       end;
 
       declare
          Current : Integer := Frequencies'First;
-         Total   : Natural := 0;
+         Total   : Long_Float := 0.0;
       begin
 
          return Table : Height_Table_Type (Frequency_Table'Range) do
             for I in Frequency_Table'Range loop
-               Total := Total + Frequency_Table (I);
+               Total := Total
+                 + Long_Float (Frequency_Table (I)) / Long_Float (Sum);
                if Current < Local'Last
                  and then Total > Local (Current)
                then
                   Current := Current + 1;
                end if;
                Table (I) := Current;
---                 declare
---                    use Ada.Text_IO;
---                 begin
---                    Put (I'Image);
---                    Set_Col (8);
---                    Put (Natural'Image (Frequency_Table (I)));
---                    Set_Col (16);
---                    Put (Total'Image);
---                    Set_Col (24);
---                    Put (Natural'Image (Total * 100 / Sum)
---                         & "%");
---                    Set_Col (32);
---                    Put (Natural'Image (Local (Current)));
---                    Set_Col (40);
---                    Put (Current'Image);
---                    New_Line;
---                 end;
+
+--                 if Frequency_Table (I) > 0 then
+--                    declare
+--                       use Ada.Text_IO;
+--                    begin
+--                       Put (I'Image);
+--                       Set_Col (8);
+--                       Put (Natural'Image (Frequency_Table (I)));
+--                       Set_Col (24);
+--                       Put (Natural'Image (Natural (Total * 100.0))
+--                            & "%");
+--                       Set_Col (32);
+--                   Put (Natural'Image (Natural (Local (Current) * 100.0)));
+--                       Set_Col (40);
+--                       Put (Current'Image);
+--                       New_Line;
+--                    end;
+--                 end if;
 
             end loop;
          end return;
