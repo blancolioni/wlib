@@ -9,6 +9,8 @@ package WL.Heaps is
 
    type Heap is tagged private;
 
+   function Empty_Heap return Heap;
+
    function Is_Empty
      (Container : Heap)
       return Boolean;
@@ -59,6 +61,9 @@ private
       record
          Vector : Heap_Vectors.Vector;
       end record;
+
+   function Empty_Heap return Heap
+   is (Vector => Heap_Vectors.Empty_Vector);
 
    function Length
      (Container : Heap)
