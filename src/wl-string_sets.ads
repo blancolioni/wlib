@@ -18,7 +18,7 @@ package WL.String_Sets is
    procedure Clear
      (Container : in out Set);
 
-   procedure Insert
+   procedure Include
      (Container : in out Set;
       Element   : String);
 

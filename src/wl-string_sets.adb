@@ -29,7 +29,7 @@ package body WL.String_Sets is
    -- Insert --
    ------------
 
-   procedure Insert
+   procedure Include
      (Container : in out Set;
       Element   : String)
    is
@@ -37,7 +37,7 @@ package body WL.String_Sets is
       if not Container.Contains (Element) then
          Container.Container.Insert (Element, True);
       end if;
-   end Insert;
+   end Include;
 
    -------------
    -- Iterate --
