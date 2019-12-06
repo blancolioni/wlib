@@ -13,6 +13,8 @@ package WL.Numerics.Generic_Trigonometry is
    function "+" (X, Y : Angle) return Angle;
    function "-" (X, Y : Angle) return Angle;
 
+   function "abs" (X : Angle) return Angle;
+
    function Sin (Theta : Angle) return Signed_Unit_Real;
    function Cos (Theta : Angle) return Signed_Unit_Real;
    function Tan (Theta : Angle) return Real;
@@ -37,5 +39,7 @@ private
    type Angle is new Real range -Ada.Numerics.Pi .. Ada.Numerics.Pi;
 
    Pi : constant Angle := Angle (Ada.Numerics.Pi);
+
+   pragma Import (Intrinsic, "abs");
 
 end WL.Numerics.Generic_Trigonometry;
