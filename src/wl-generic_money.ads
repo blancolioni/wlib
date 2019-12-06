@@ -134,6 +134,12 @@ private
    type Money_Type is range -2 ** 63 .. 2 ** 63 - 1;
    type Price_Type is range 0 .. 2 ** 63 - 1;
 
+   function To_Money (Amount : Real) return Money_Type
+   is (Money_Type (Real'Truncation (Amount * 1000.0)));
+
+   function To_Real (Amount : Money_Type) return Real
+   is (Real (Amount) / 1000.0);
+
    function To_Price (Amount : Real) return Price_Type
    is (Price_Type (To_Money (Amount)));
 

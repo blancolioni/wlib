@@ -340,24 +340,6 @@ package body WL.Generic_Money is
       return Price_Type (Real (Price) * Tax);
    end Tax;
 
-   --------------
-   -- To_Money --
-   --------------
-
-   function To_Money (Amount : Real) return Money_Type is
-   begin
-      return Money_Type (Real'Truncation (Amount * 1000.0));
-   end To_Money;
-
-   --------------
-   -- To_Real --
-   --------------
-
-   function To_Real (Amount : Money_Type) return Real is
-   begin
-      return Real (Amount) / 1000.0;
-   end To_Real;
-
    -----------
    -- Total --
    -----------
