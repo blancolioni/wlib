@@ -12,11 +12,10 @@ package body WL.Images is
       Height : Pixel_Y_Count;
       Layers : Layer_Count := 1)
    is
-      Layer_Data : Image_Data (1 .. Width, 1 .. Height);
       Layer      : Image_Layer_Record := (Width, Height, others => <>);
    begin
-      Layer.Data.Replace_Element (Layer_Data);
       for I in 1 .. Layers loop
+         Layer.Data := new Image_Data (1 .. Width, 1 .. Height);
          Image.Layers.Append (Layer);
       end loop;
    end Create;
@@ -68,7 +67,7 @@ package body WL.Images is
       Color : Image_Color)
    is
    begin
-      Image.Layers (Layer).Data.Reference.Element (X, Y) := Color;
+      Image.Layers (Layer).Data (X, Y) := Color;
    end Set_Color;
 
    -----------

@@ -1,4 +1,3 @@
-private with Ada.Containers.Indefinite_Holders;
 private with Ada.Containers.Vectors;
 
 with WL.Binary_IO;
@@ -117,14 +116,13 @@ private
    type Image_Data is
      array (Pixel_X_Range range <>, Pixel_Y_Range range <>) of Image_Color;
 
-   package Image_Data_Holders is
-     new Ada.Containers.Indefinite_Holders (Image_Data);
+   type Image_Data_Access is access Image_Data;
 
    type Image_Layer_Record is
       record
          Width  : Pixel_X_Count;
          Height : Pixel_Y_Count;
-         Data   : Image_Data_Holders.Holder;
+         Data   : Image_Data_Access;
       end record;
 
    package Image_Layer_Vectors is
@@ -133,11 +131,7 @@ private
    type Image_Type is tagged
       record
          Layers : Image_Layer_Vectors.Vector;
-      end record
-     with Invariant =>
-       (for all Layer of Image_Type.Layers =>
-          Layer.Width = Layer.Data.Element'Length (1)
-        and then Layer.Height = Layer.Data.Element'Length (2));
+      end record;
 
    function Number_Of_Layers
      (Image : Image_Type'Class)
@@ -169,6 +163,6 @@ private
       X     : Pixel_X_Range;
       Y     : Pixel_Y_Range)
       return Image_Color
-   is (Image.Layers.Element (Layer).Data.Element (X, Y));
+   is (Image.Layers.Element (Layer).Data (X, Y));
 
 end WL.Images;
