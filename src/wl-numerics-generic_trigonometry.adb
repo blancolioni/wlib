@@ -25,6 +25,15 @@ package body WL.Numerics.Generic_Trigonometry is
       return From_Radians (Real (X) - Real (Y));
    end "-";
 
+   ---------
+   -- "<" --
+   ---------
+
+   overriding function "<" (X, Y : Angle) return Boolean is
+   begin
+      return abs (Real (X)) < abs (Real (Y));
+   end "<";
+
    ------------
    -- Arccos --
    ------------

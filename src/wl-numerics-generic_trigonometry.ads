@@ -13,6 +13,14 @@ package WL.Numerics.Generic_Trigonometry is
    function "+" (X, Y : Angle) return Angle;
    function "-" (X, Y : Angle) return Angle;
 
+   function "+" (X : Angle) return Angle;
+   function "-" (X : Angle) return Angle;
+
+   function "<" (X, Y : Angle) return Boolean;
+   function ">" (X, Y : Angle) return Boolean;
+   function "<=" (X, Y : Angle) return Boolean;
+   function ">=" (X, Y : Angle) return Boolean;
+
    function "abs" (X : Angle) return Angle;
 
    function Sin (Theta : Angle) return Signed_Unit_Real;
@@ -33,6 +41,7 @@ package WL.Numerics.Generic_Trigonometry is
    function To_Degrees (Theta : Angle) return Real;
 
    function Image (X : Angle) return String;
+   function Value (X : String) return Angle;
 
 private
 
@@ -41,5 +50,16 @@ private
    Pi : constant Angle := Angle (Ada.Numerics.Pi);
 
    pragma Import (Intrinsic, "abs");
+
+   overriding function ">" (X, Y : Angle) return Boolean is (Y < X);
+   overriding function "<=" (X, Y : Angle) return Boolean is (not (X > Y));
+   overriding function ">=" (X, Y : Angle) return Boolean is (not (Y > X));
+
+   overriding function "+" (X : Angle) return Angle is (X);
+   overriding function "-" (X : Angle) return Angle is
+     (Angle (-Real (X)));
+
+   function Value (X : String) return Angle
+   is (From_Degrees (Real'Value (X)));
 
 end WL.Numerics.Generic_Trigonometry;
