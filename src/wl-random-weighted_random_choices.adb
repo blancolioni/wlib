@@ -5,7 +5,7 @@ package body WL.Random.Weighted_Random_Choices is
    ------------
 
    function Choose
-     (Set : Weighted_Choice_Set'Class)
+     (Set : Weighted_Choice_Set)
       return Element_Type
    is
       X : Positive := WL.Random.Random_Number (1, Set.Total_Score);
@@ -23,11 +23,34 @@ package body WL.Random.Weighted_Random_Choices is
    end Choose;
 
    ------------
+   -- Delete --
+   ------------
+
+   procedure Delete
+     (Set    : in out Weighted_Choice_Set;
+      Item   : Element_Type)
+   is
+      Found : Boolean := False;
+   begin
+      for I in 1 .. Set.Vector.Last_Index loop
+         if Set.Vector (I).Element = Item then
+            Found := True;
+         elsif Found then
+            Set.Vector (I - 1) := Set.Vector (I);
+         end if;
+      end loop;
+
+      if Found then
+         Set.Vector.Delete_Last;
+      end if;
+   end Delete;
+
+   ------------
    -- Insert --
    ------------
 
    procedure Insert
-     (Set    : in out Weighted_Choice_Set'Class;
+     (Set    : in out Weighted_Choice_Set;
       Item   : Element_Type;
       Score  : Natural)
    is
