@@ -18,6 +18,11 @@ package body WL.Processes is
    procedure Send_Escape_Sequence
      (Sequence : Escape_Sequence);
 
+   function "+" (X : String) return Ada.Strings.Unbounded.Unbounded_String
+                 renames Ada.Strings.Unbounded.To_Unbounded_String;
+
+   function "-" (X : Ada.Strings.Unbounded.Unbounded_String) return String
+                 renames Ada.Strings.Unbounded.To_String;
    ------------
    -- Finish --
    ------------
@@ -38,7 +43,7 @@ package body WL.Processes is
                Put
                  (Ada.Text_IO.Standard_Error,
                   Character'Val (13)
-                  & Process.Name.all
+                  & (-Process.Name)
                   & ": ");
                if Process.Percent then
                   Put (Standard_Error, "100% ");
@@ -50,11 +55,11 @@ package body WL.Processes is
          when Percentage =>
             Put (Ada.Text_IO.Standard_Error,
                  Character'Val (13) &
-                   Process.Name.all & ": 100%");
+                   (-Process.Name) & ": 100%");
          when Counter =>
             Put (Ada.Text_IO.Standard_Error,
                  Character'Val (13)
-                 & Process.Name.all & ":"
+                 & (-Process.Name) & ":"
                  & Natural'Image (Process.Tick));
       end case;
 
@@ -102,7 +107,7 @@ package body WL.Processes is
       Put (Ada.Text_IO.Standard_Error,
            Name & ":      [" & Spaces & "]");
       Flush (Ada.Text_IO.Standard_Error);
-      Process.Name    := new String'(Name);
+      Process.Name    := +Name;
       Process.Display := Bar;
       Process.Percent := With_Percentage;
       Process.Tick    := 0;
@@ -123,7 +128,7 @@ package body WL.Processes is
    begin
       Put (Ada.Text_IO.Standard_Error, Name & ": 0");
       Flush (Ada.Text_IO.Standard_Error);
-      Process.Name    := new String'(Name);
+      Process.Name    := +Name;
       Process.Display := Counter;
       Process.Tick    := 0;
       Process.Step    := Tick_Size;
@@ -144,7 +149,7 @@ package body WL.Processes is
    begin
       Put (Ada.Text_IO.Standard_Error, Name & ": 0%");
       Flush (Ada.Text_IO.Standard_Error);
-      Process.Name    := new String'(Name);
+      Process.Name    := +Name;
       Process.Display := Percentage;
       Process.Tick    := 0;
       Process.Finish  := Finish;
@@ -231,7 +236,7 @@ package body WL.Processes is
                      Put
                        (Ada.Text_IO.Standard_Error,
                         Character'Val (13)
-                        & Process.Name.all
+                        & (-Process.Name)
                         & ": ");
                      if Process.Percent then
                         Ada.Integer_Text_IO.Put
@@ -260,7 +265,7 @@ package body WL.Processes is
                   if Last_Value /= Value then
                      Put (Ada.Text_IO.Standard_Error,
                           Character'Val (13) &
-                            Process.Name.all & ":"
+                            (-Process.Name) & ":"
                           & Natural'Image (Value) & "%");
                      Flush (Ada.Text_IO.Standard_Error);
                   end if;
@@ -273,7 +278,7 @@ package body WL.Processes is
                   if Now - Process.Prev > 0.1 then
                      Put (Ada.Text_IO.Standard_Error,
                           Character'Val (13)
-                          & Process.Name.all & ":"
+                          & (-Process.Name) & ":"
                           & Natural'Image (Process.Tick));
                      Flush (Ada.Text_IO.Standard_Error);
                      Process.Prev := Now;

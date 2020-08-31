@@ -1,3 +1,4 @@
+private with Ada.Strings.Unbounded;
 with Ada.Calendar;
 
 package WL.Processes is
@@ -35,7 +36,7 @@ private
 
    type Process_Type is tagged limited
       record
-         Name       : access String;
+         Name       : Ada.Strings.Unbounded.Unbounded_String;
          Display    : Display_Type;
          Prev       : Ada.Calendar.Time;
          Percent    : Boolean  := False;
