@@ -41,7 +41,7 @@ package body WL.Graphs is
       Sub        : Sub_Graph)
    is
    begin
-      Collection.List.Append (Sub);
+      Collection.Vector.Append (Sub);
    end Append;
 
    ------------------------
@@ -163,6 +163,49 @@ package body WL.Graphs is
       end loop;
 
       return Start;
+
+   end Breadth_First_Search;
+
+   --------------------------
+   -- Breadth_First_Search --
+   --------------------------
+
+   procedure Breadth_First_Search
+     (Container : Graph;
+      Start     : Index_Type;
+      Max_Steps : Count_Type;
+      Result    : out Sub_Graph)
+   is
+      type Partial is
+         record
+            Index : Index_Type;
+            Steps : Count_Type;
+         end record;
+
+      package Queue_Of_Partials is
+         new Ada.Containers.Doubly_Linked_Lists (Partial);
+      Queue : Queue_Of_Partials.List;
+   begin
+      Container.Create (Result);
+      Queue.Append ((Start, 0));
+      while not Queue.Is_Empty loop
+         declare
+            use type Ada.Containers.Count_Type;
+            P     : constant Partial := Queue.First_Element;
+            Ix    : constant Index_Type := P.Index;
+            Steps : constant Count_Type := P.Steps;
+         begin
+            Queue.Delete_First;
+            if not Contains (Result, Ix) then
+               Append (Result, Ix);
+               if Steps < Max_Steps then
+                  for Edge of Container.Vertices.Element (Ix).Edges loop
+                     Queue.Append ((Edge.To, Steps + 1));
+                  end loop;
+               end if;
+            end if;
+         end;
+      end loop;
 
    end Breadth_First_Search;
 
@@ -357,7 +400,7 @@ package body WL.Graphs is
       return Boolean
    is
    begin
-      for Sub of Collection.List loop
+      for Sub of Collection.Vector loop
          if Contains (Sub, Index) then
             return True;
          end if;
@@ -470,7 +513,7 @@ package body WL.Graphs is
       Result    : out Sub_Graph_Collection)
    is
    begin
-      Result.List.Clear;
+      Result.Vector.Clear;
       for Index in 1 .. Container.Vertices.Last_Index loop
          if not Contains (Result, Index) then
             declare
@@ -482,6 +525,19 @@ package body WL.Graphs is
          end if;
       end loop;
    end Get_Connected_Components;
+
+   -------------------
+   -- Get_Sub_Graph --
+   -------------------
+
+   function Get_Sub_Graph
+     (Collection : Sub_Graph_Collection;
+      Index      : Positive)
+      return Sub_Graph
+   is
+   begin
+      return Collection.Vector (Index);
+   end Get_Sub_Graph;
 
    --------------
    -- Index_Of --
@@ -510,7 +566,7 @@ package body WL.Graphs is
       Sub        : Sub_Graph)
    is
    begin
-      Collection.List.Append (Sub);
+      Collection.Vector.Append (Sub);
    end Insert;
 
    -------------
@@ -651,7 +707,7 @@ package body WL.Graphs is
       return Boolean
    is
    begin
-      for Sub_Graph of Collection.List loop
+      for Sub_Graph of Collection.Vector loop
          if Contains (Sub_Graph, V1) then
             return Contains (Sub_Graph, V2);
          elsif Contains (Sub_Graph, V2) then
@@ -856,7 +912,7 @@ package body WL.Graphs is
       return Natural
    is
    begin
-      return Natural (Collection.List.Length);
+      return Collection.Vector.Last_Index;
    end Sub_Graph_Count;
 
    ------------

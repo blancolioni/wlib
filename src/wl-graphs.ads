@@ -126,6 +126,12 @@ package WL.Graphs is
    procedure Breadth_First_Search
      (Container : Graph;
       Start     : Index_Type;
+      Max_Steps : Count_Type;
+      Result    : out Sub_Graph);
+
+   procedure Breadth_First_Search
+     (Container : Graph;
+      Start     : Index_Type;
       Test      : not null access
         function (Vertex : Vertex_Type) return Boolean;
       Result    : out Sub_Graph);
@@ -155,6 +161,12 @@ package WL.Graphs is
    function Sub_Graph_Count
      (Collection : Sub_Graph_Collection)
       return Natural;
+
+   function Get_Sub_Graph
+     (Collection : Sub_Graph_Collection;
+      Index      : Positive)
+      return Sub_Graph
+     with Pre => Index <= Sub_Graph_Count (Collection);
 
    function Same_Sub_Graph
      (Collection : Sub_Graph_Collection;
@@ -275,12 +287,12 @@ private
          Vertex_Flags : Index_Flag_Vectors.Vector;
       end record;
 
-   package Sub_Graph_Lists is
-     new Ada.Containers.Doubly_Linked_Lists (Sub_Graph);
+   package Sub_Graph_Vectors is
+     new Ada.Containers.Vectors (Positive, Sub_Graph);
 
    type Sub_Graph_Collection is
       record
-         List : Sub_Graph_Lists.List;
+         Vector : Sub_Graph_Vectors.Vector;
       end record;
 
    type Path is
