@@ -10,6 +10,9 @@ package WL.Generic_Money is
 
    function Zero return Money_Type;
 
+   function "+" (Left : Money_Type) return Money_Type;
+   function "-" (Left : Money_Type) return Money_Type;
+
    function "+" (Left, Right : Money_Type) return Money_Type;
    function "-" (Left, Right : Money_Type) return Money_Type;
 
