@@ -23,6 +23,9 @@ package WL.Numerics.Generic_Trigonometry is
 
    function "abs" (X : Angle) return Angle;
 
+   function "*" (X : Real; Y : Angle) return Angle;
+   function "*" (X : Angle; Y : Real) return Angle;
+
    function Sin (Theta : Angle) return Signed_Unit_Real;
    function Cos (Theta : Angle) return Signed_Unit_Real;
    function Tan (Theta : Angle) return Real;
@@ -58,6 +61,12 @@ private
    overriding function "+" (X : Angle) return Angle is (X);
    overriding function "-" (X : Angle) return Angle is
      (Angle (-Real (X)));
+
+   function "*" (X : Real; Y : Angle) return Angle
+   is (From_Radians (X * To_Radians (Y)));
+
+   function "*" (X : Angle; Y : Real) return Angle
+   is (From_Radians (To_Radians (X) * Y));
 
    function Value (X : String) return Angle
    is (From_Degrees (Real'Value (X)));
