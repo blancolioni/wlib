@@ -13,9 +13,10 @@ package body WL.Graphs is
    is
    begin
       Container.Vertices.Append
-        ((Vertex => Vertex,
-          Index  => Container.Vertices.Last_Index + 1,
-          Edges  => Edge_Lists.Empty_List));
+        (Vertex_Info'
+           (Vertex => Vertex,
+            Index  => Container.Vertices.Last_Index + 1,
+            Edges  => Edge_Lists.Empty_List));
       Container.Vs.Append (Vertex);
    end Append;
 

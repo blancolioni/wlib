@@ -76,7 +76,7 @@ package body WL.Heaps is
       Element   : Element_Type)
    is
    begin
-      Container.Vector.Append ((Key, Element));
+      Container.Vector.Append (Heap_Element'(Key, Element));
       Container.Sift_Up (1, Container.Vector.Last_Index);
    end Insert;
 
