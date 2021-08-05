@@ -6,14 +6,24 @@ package WL.String_Sets is
 
    type Set is tagged private;
 
+   Empty_Set : constant Set;
+
    function Is_Empty
      (Container : Set)
       return Boolean;
+
+   function Count
+     (Container : Set)
+      return Natural;
 
    function Contains
      (Container : Set;
       Element   : String)
       return Boolean;
+
+   function First_Element
+     (Container : Set)
+      return String;
 
    procedure Clear
      (Container : in out Set);
@@ -40,6 +50,8 @@ private
          Container : Sets.Map;
       end record;
 
+   Empty_Set : constant Set := (Container => <>);
+
    function Contains
      (Container : Set;
       Element   : String)
@@ -50,5 +62,15 @@ private
      (Container : Set)
       return Boolean
    is (Container.Container.Is_Empty);
+
+   function Count
+     (Container : Set)
+      return Natural
+   is (Natural (Container.Container.Length));
+
+   function First_Element
+     (Container : Set)
+      return String
+   is (Sets.Key (Container.Container.First));
 
 end WL.String_Sets;
