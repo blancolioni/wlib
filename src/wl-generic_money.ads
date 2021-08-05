@@ -9,6 +9,7 @@ package WL.Generic_Money is
    subtype Real is Quantities.Real;
 
    function Zero return Money_Type;
+   function Infinite return Money_Type;
 
    function "+" (Left : Money_Type) return Money_Type;
    function "-" (Left : Money_Type) return Money_Type;
@@ -153,6 +154,9 @@ private
                    Quantity : Real)
                    return Money_Type
    is (To_Money (To_Real (Price) * Quantity));
+
+   function Infinite return Money_Type
+   is (Money_Type'Last);
 
    pragma Import (Intrinsic, "+");
    pragma Import (Intrinsic, "-");
