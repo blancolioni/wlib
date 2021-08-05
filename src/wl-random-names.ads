@@ -9,6 +9,10 @@ package WL.Random.Names is
       Vowels_Path     : in     String;
       Consonants_Path : in String);
 
+   function Load_Lexicon
+     (Vowels_Path     : String;
+      Consonants_Path : String)
+     return Name_Generator;
 
    function Random_Name
      (Generator : Name_Generator)

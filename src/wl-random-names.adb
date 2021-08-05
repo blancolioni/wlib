@@ -7,6 +7,21 @@ package body WL.Random.Names is
    -- Load_Lexicon --
    ------------------
 
+   function Load_Lexicon
+     (Vowels_Path     : String;
+      Consonants_Path : String)
+      return Name_Generator
+   is
+   begin
+      return Gen : Name_Generator do
+         Load_Lexicon (Gen, Vowels_Path, Consonants_Path);
+      end return;
+   end Load_Lexicon;
+
+   ------------------
+   -- Load_Lexicon --
+   ------------------
+
    procedure Load_Lexicon
      (Generator       :    out Name_Generator;
       Vowels_Path     : in     String;
