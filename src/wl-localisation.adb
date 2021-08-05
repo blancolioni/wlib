@@ -293,8 +293,10 @@ package body WL.Localisation is
          begin
             if Index > 0 then
                declare
+                  Raw_Key : constant String :=
+                              Line (Line'First .. Index - 1);
                   Key : constant String :=
-                          To_Key (Language, Line (Line'First .. Index - 1));
+                          To_Key (Language, Raw_Key);
                   Value : constant String :=
                             Line (Index + 1 .. Line'Last);
                begin
@@ -302,8 +304,8 @@ package body WL.Localisation is
                      Ada.Text_IO.Put_Line
                        (Ada.Text_IO.Standard_Error,
                         "duplicate localisation entries found for '"
-                        & Key & "'"
-                        & (if Value = Local_Map.Element (Value)
+                        & Raw_Key & "'"
+                        & (if Value = Local_Map.Element (Key)
                           then " with identical values"
                           else " with different values"));
                   else
