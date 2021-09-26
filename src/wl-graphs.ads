@@ -22,6 +22,10 @@ package WL.Graphs is
 
    type Graph is tagged private;
 
+   function Is_Empty
+     (Container : Graph)
+      return Boolean;
+
    function Vertex
      (Container : Graph;
       Index     : Index_Type)
@@ -311,5 +315,10 @@ private
       Vertex    : Index_Type)
       return Count_Type
    is (Container.Vertices.Element (Vertex).Edges.Length);
+
+   function Is_Empty
+     (Container : Graph)
+      return Boolean
+   is (Container.Vs.Is_Empty);
 
 end WL.Graphs;
