@@ -56,7 +56,7 @@ package body WL.Random.Weighted_Random_Choices is
    is
    begin
       if Score > 0 then
-         Set.Vector.Append ((Item, Score));
+         Set.Vector.Append (Weighted_Element'(Item, Score));
          Set.Total_Score := Set.Total_Score + Score;
       end if;
    end Insert;
