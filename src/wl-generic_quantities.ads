@@ -11,6 +11,8 @@ package WL.Generic_Quantities is
    function Unit return Quantity_Type;
 
    function To_Quantity (Value : Real) return Quantity_Type;
+   function To_Quantity (Value : Natural) return Quantity_Type;
+
    function To_Real (Value : Quantity_Type) return Real;
    function To_Natural (Value : Quantity_Type) return Natural;
 

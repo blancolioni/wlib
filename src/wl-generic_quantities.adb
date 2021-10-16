@@ -244,6 +244,15 @@ package body WL.Generic_Quantities is
       return Quantity_Type (Real (Value * Real_To_Quantity_Scale));
    end To_Quantity;
 
+   -----------------
+   -- To_Quantity --
+   -----------------
+
+   function To_Quantity (Value : Natural) return Quantity_Type is
+   begin
+      return To_Quantity (Real (Value));
+   end To_Quantity;
+
    --------------
    -- To_Real --
    --------------
