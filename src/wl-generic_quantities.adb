@@ -153,8 +153,16 @@ package body WL.Generic_Quantities is
                       (Natural
                          (Real_To_Quantity_Scale * R)
                        + Natural (Real_To_Quantity_Scale * 10.0));
+            Last : Natural := Img'Last;
          begin
-            return "0." & Img (Img'First + 3 .. Img'Last);
+            while Last > 0 and then Img (Last) = '0' loop
+               Last := Last - 1;
+            end loop;
+            if Last = 0 or else Img (Last) not in '0' .. '9' then
+               return "0.0";
+            else
+               return "0." & Img (Img'First + 3 .. Last);
+            end if;
          end;
       else
          for I in Factors'Range loop
