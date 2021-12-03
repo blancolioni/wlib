@@ -1,4 +1,5 @@
 with Ada.Command_Line;
+with Ada.Containers.Indefinite_Vectors;
 with Ada.Directories;
 with Ada.Strings.Fixed;
 with Ada.Text_IO;
@@ -10,8 +11,73 @@ package body WL.Command_Line is
    package Option_Value_Maps is
      new WL.String_Maps (String);
 
+   package Argument_Vectors is
+     new Ada.Containers.Indefinite_Vectors (Positive, String);
+
    Default_Values : Option_Value_Maps.Map;
    Cached_Values : Option_Value_Maps.Map;
+
+   Argument_Vector : Argument_Vectors.Vector;
+   Loaded_Arguments : Boolean := False;
+
+   procedure Check_Arguments;
+
+   --------------
+   -- Argument --
+   --------------
+
+   function Argument (Index : Positive) return String is
+   begin
+      Check_Arguments;
+      return Argument_Vector.Element (Index);
+   end Argument;
+
+   --------------------
+   -- Argument_Count --
+   --------------------
+
+   function Argument_Count return Natural is
+   begin
+      Check_Arguments;
+      return Argument_Vector.Last_Index;
+   end Argument_Count;
+
+   ---------------------
+   -- Check_Arguments --
+   ---------------------
+
+   procedure Check_Arguments is
+      Skip_Next : Boolean := False;
+      Keep_Rest : Boolean := False;
+   begin
+      if Loaded_Arguments then
+         return;
+      end if;
+
+      for I in 1 .. Ada.Command_Line.Argument_Count loop
+         if Keep_Rest then
+            Argument_Vector.Append (Ada.Command_Line.Argument (I));
+         elsif Skip_Next then
+            Skip_Next := False;
+         else
+            declare
+               Text : constant String :=
+                        Ada.Command_Line.Argument (I);
+            begin
+               if Text = "--" then
+                  Keep_Rest := True;
+               elsif Text'Length > 2
+                 and then Text (Text'First .. Text'First + 1) = "--"
+               then
+                  null;
+               else
+                  Argument_Vector.Append (Ada.Command_Line.Argument (I));
+               end if;
+            end;
+         end if;
+      end loop;
+      Loaded_Arguments := True;
+   end Check_Arguments;
 
    -----------------
    -- Find_Option --

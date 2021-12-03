@@ -19,4 +19,8 @@ package WL.Command_Line is
       Default    : Integer    := 0)
      return Integer;
 
+   function Argument_Count return Natural;
+   function Argument (Index : Positive) return String
+     with Pre => Index <= Argument_Count;
+
 end WL.Command_Line;
