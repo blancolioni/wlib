@@ -1,6 +1,7 @@
 generic
    type Real is digits <>;
    Decimal_Places : Natural := 0;
+   Max_Value : Real := Real'Last;
 package WL.Generic_Quantities is
 
    subtype Unit_Real is Real range 0.0 .. 1.0;
@@ -10,10 +11,14 @@ package WL.Generic_Quantities is
    function Zero return Quantity_Type;
    function Unit return Quantity_Type;
 
-   function To_Quantity (Value : Real) return Quantity_Type;
+   function To_Quantity (Value : Real) return Quantity_Type
+     with Pre => Value <= Max_Value;
+
    function To_Quantity (Value : Natural) return Quantity_Type;
 
-   function To_Real (Value : Quantity_Type) return Real;
+   function To_Real (Value : Quantity_Type) return Real
+     with Post => To_Real'Result <= Max_Value;
+
    function To_Natural (Value : Quantity_Type) return Natural;
 
    function Image (Item : Quantity_Type) return String;
