@@ -20,6 +20,7 @@ package WL.String_Maps is
    type Map is new Maps.Map with null record;
 
    subtype Cursor is Maps.Cursor;
+   function No_Element return Cursor is (Maps.No_Element);
 
    Empty_Map : constant Map := Map'(Maps.Empty_Map with null record);
 
