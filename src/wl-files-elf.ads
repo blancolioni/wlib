@@ -75,6 +75,13 @@ package WL.Files.ELF is
       Visibility   : Symbol_Table_Visibility;
       Section_Name : String);
 
+   procedure Add_Symbol_Reference
+     (File           : in out File_Type;
+      Name           : String;
+      Section_Name   : String;
+      Section_Offset : Address_32;
+      Info           : Octet);
+
    procedure Put
      (File  : in out File_Type;
       Value : Octet);
@@ -154,6 +161,13 @@ private
       end record
      with Pack, Size => 4 * 32;
 
+   type Relocation_Entry is
+      record
+         Offset : Address_32;
+         Info   : Elf_Word_32;
+      end record
+     with Pack, Size => 64;
+
    package Storage_Element_Vectors is
      new Ada.Containers.Vectors
        (Positive, System.Storage_Elements.Storage_Element,
@@ -175,6 +189,9 @@ private
    package Storage_IO is
      new Ada.Sequential_IO (System.Storage_Elements.Storage_Element);
 
+   package Symbol_Index_Maps is
+     new WL.String_Maps (Elf_Word_32);
+
    type File_Type is limited
       record
          Header       : Elf_Header;
@@ -182,6 +199,7 @@ private
          Section_Map  : Section_Maps.Map;
          Current      : Section_Lists.Cursor;
          Symbol_Table : Section_Record;
+         Symbol_Map   : Symbol_Index_Maps.Map;
          String_Table : Section_Record;
          Storage_File : Storage_IO.File_Type;
          Data         : Storage_Element_Vectors.Vector;

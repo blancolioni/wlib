@@ -39,6 +39,61 @@ package body WL.Files.ELF is
      (Vector : in out Storage_Element_Vectors.Vector;
       Nm     : String);
 
+   --------------------------
+   -- Add_Symbol_Reference --
+   --------------------------
+
+   procedure Add_Symbol_Reference
+     (File           : in out File_Type;
+      Name           : String;
+      Section_Name   : String;
+      Section_Offset : Address_32;
+      Info           : Octet)
+   is
+      Rel_Name : constant String := ".rel" & Section_Name;
+   begin
+      if not File.Section_Map.Contains (Rel_Name) then
+         File.Section_List.Append
+           (Section_Record'
+              (Header => Section_Header'
+                   (Sh_Name      => Save_Name (File, Rel_Name),
+                    Sh_Type      => Section_Header_Type'Pos (Rel),
+                    Sh_Flags     => 2 ** 6,
+                    Sh_Addr      => 0,
+                    Sh_Offset    => 0,
+                    Sh_Size      => 0,
+                    Sh_Link      => 0,
+                    Sh_Info      => 1,
+                    Sh_Addralign => 4,
+                    Sh_Entsize   => 8),
+               Index  => Elf_Word_16 (File.Section_List.Length),
+               Data   => <>));
+         File.Section_Map.Insert (Rel_Name, File.Section_List.Last);
+      end if;
+
+      if not File.Symbol_Map.Contains (Name) then
+         New_Symbol (File, Name, 0, 0, Global, Object, Default, Section_Name);
+      end if;
+
+      declare
+         use System.Storage_Elements;
+         Rel : Relocation_Entry :=
+                 Relocation_Entry'
+                   (Offset => Section_Offset,
+                    Info   => (File.Symbol_Map (Name) - 1) * 256
+                    + Elf_Word_32 (Info));
+         Data : Storage_Array (1 .. Rel'Size / 8);
+         pragma Import (Ada, Data);
+         for Data'Address use Rel'Address;
+         Section : Section_Record renames
+                     File.Section_List (File.Section_Map (Rel_Name));
+      begin
+         for Element of Data loop
+            Section.Data.Append (Element);
+         end loop;
+      end;
+   end Add_Symbol_Reference;
+
    -----------
    -- Align --
    -----------
@@ -70,6 +125,12 @@ package body WL.Files.ELF is
       use type System.Storage_Elements.Storage_Count;
       Start_Offset : constant := 16#0040#;
    begin
+
+      for Section of File.Section_List loop
+         if Section.Header.Sh_Type = Section_Header_Type'Pos (Rel) then
+            Section.Header.Sh_Link := Elf_Word_32 (File.Section_List.Length);
+         end if;
+      end loop;
 
       File.Symbol_Table.Header.Sh_Name :=
         Elf_Word_32 (File.String_Table.Data.Length);
@@ -320,6 +381,10 @@ package body WL.Files.ELF is
       for Element of Data loop
          File.Symbol_Table.Data.Append (Element);
       end loop;
+
+      File.Symbol_Map.Insert
+        (Name, Elf_Word_32 (File.Symbol_Table.Data.Length)
+         / Elf_Word_32 (Data'Length));
 
       if Binding = Local then
          File.Symbol_Table.Header.Sh_Info := @ + 1;
