@@ -364,7 +364,9 @@ package body WL.Files.ELF is
       Section_Name : String)
    is
       use System.Storage_Elements;
-      Shndx : constant Elf_Word_16 := Find_Section (File, Section_Name);
+      Shndx : constant Elf_Word_16 :=
+                (if Section_Name = "" then 0
+                 else Find_Section (File, Section_Name));
       Sym : constant Symbol_Table_Entry :=
               Symbol_Table_Entry'
                 (St_Name    => Save_Name (File, Name),
