@@ -342,7 +342,7 @@ package body WL.Files.ELF is
                   Sh_Addralign => 0,
                   Sh_Entsize   => 0),
                Index  => Elf_Word_16 (File.Section_List.Length),
-               Data   => <>);
+               Data   => Storage_Element_Vectors.Empty_Vector);
    begin
       File.Section_List.Append (Rec);
       File.Section_Map.Insert (Name, File.Section_List.Last);
@@ -389,7 +389,12 @@ package body WL.Files.ELF is
          / Elf_Word_32 (Data'Length));
 
       if Binding = Local then
-         File.Symbol_Table.Header.Sh_Info := @ + 1;
+         declare
+            Sh_Info : Elf_Word_32 renames
+              File.Symbol_Table.Header.Sh_Info;
+         begin
+            Sh_Info := Sh_Info + 1;
+         end;
       end if;
 
    end New_Symbol;

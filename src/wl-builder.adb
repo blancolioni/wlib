@@ -36,7 +36,6 @@ with WL.Command_Line.Options;
 with WL.Command_Line.Parser;
 with WL.Debug;
 with WL.File_Manager;
-with WL.Image;
 with WL.Lists;
 with WL.Lists.Generic_List;
 with WL.Lists.String_List;

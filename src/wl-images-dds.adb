@@ -201,7 +201,7 @@ package body WL.Images.DDS is
 
    procedure Read_DDS
      (Image : out Image_Type'Class;
-      Path  : in  String)
+      Path  : String)
    is
       File : File_Type;
       Header : D3D_Surface_Desc_2;
@@ -273,7 +273,7 @@ package body WL.Images.DDS is
                            (Width  => Pixel_X_Count (W),
                             Height => Pixel_Y_Count (H),
                             Data   => <>);
-               Data  : constant access Image_Data :=
+               Data  : constant Image_Data_Access :=
                          new Image_Data (1 .. Layer.Width, 1 .. Layer.Height);
             begin
 
@@ -337,8 +337,7 @@ package body WL.Images.DDS is
                   end;
                end case;
 
-               Layer.Data.Replace_Element
-                 (Data.all);
+               Layer.Data := Data;
                Image.Layers.Append (Layer);
             end;
 
