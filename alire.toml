@@ -1,7 +1,7 @@
 name = "wlib"
-description = "Shiny new project"
+description = "Various library packages"
 version = "0.1.0-dev"
-
+licenses= "GPL-3.0-or-later"
 authors = ["Fraser Wilson"]
 maintainers = ["Fraser Wilson <fraser@thewhitelion.eu>"]
 maintainers-logins = ["blancolioni"]

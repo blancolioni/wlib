@@ -1,7 +1,3 @@
---------------------
--- WL.Bit_Vectors --
---------------------
-
 package body WL.Bit_Vectors is
 
    procedure Split
